@@ -1,0 +1,239 @@
+<template>
+  <div v-if="planet" class="container mx-auto p-4 sm:p-6">
+    <!-- 未解锁遮罩 -->
+    <UnlockRequirement :required-building="BuildingType.Shipyard" :required-level="1" />
+
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">{{ t('shipyardView.title') }}</h1>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+      <Card v-for="shipType in Object.values(ShipType)" :key="shipType" class="relative">
+        <CardUnlockOverlay :requirements="SHIPS[shipType].requirements" />
+        <CardHeader>
+          <CardTitle
+            class="text-base sm:text-lg cursor-pointer hover:text-primary transition-colors"
+            @click="detailDialog.openShip(shipType)"
+          >
+            {{ SHIPS[shipType].name }}
+          </CardTitle>
+          <CardDescription class="text-xs sm:text-sm">{{ SHIPS[shipType].description }}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-3 sm:space-y-4">
+            <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+              <div>
+                <p class="text-muted-foreground">{{ t('shipyardView.attack') }}</p>
+                <p class="font-medium">{{ SHIPS[shipType].attack }}</p>
+              </div>
+              <div>
+                <p class="text-muted-foreground">{{ t('shipyardView.shield') }}</p>
+                <p class="font-medium">{{ SHIPS[shipType].shield }}</p>
+              </div>
+              <div>
+                <p class="text-muted-foreground">{{ t('shipyardView.speed') }}</p>
+                <p class="font-medium">{{ SHIPS[shipType].speed }}</p>
+              </div>
+              <div>
+                <p class="text-muted-foreground">{{ t('shipyardView.cargoCapacity') }}</p>
+                <p class="font-medium">{{ formatNumber(SHIPS[shipType].cargoCapacity) }}</p>
+              </div>
+            </div>
+
+            <div class="text-xs sm:text-sm space-y-1.5 sm:space-y-2">
+              <p class="text-muted-foreground mb-1 sm:mb-2">{{ t('shipyardView.unitCost') }}:</p>
+              <div class="space-y-1 sm:space-y-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="metal" size="sm" />
+                  <span class="text-xs">{{ t('resources.metal') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.metal, SHIPS[shipType].cost.metal)"
+                  >
+                    {{ formatNumber(SHIPS[shipType].cost.metal) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="crystal" size="sm" />
+                  <span class="text-xs">{{ t('resources.crystal') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.crystal, SHIPS[shipType].cost.crystal)"
+                  >
+                    {{ formatNumber(SHIPS[shipType].cost.crystal) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="deuterium" size="sm" />
+                  <span class="text-xs">{{ t('resources.deuterium') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.deuterium, SHIPS[shipType].cost.deuterium)"
+                  >
+                    {{ formatNumber(SHIPS[shipType].cost.deuterium) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <Label :for="`quantity-${shipType}`" class="text-xs sm:text-sm">{{ t('shipyardView.buildQuantity') }}</Label>
+              <Input
+                :id="`quantity-${shipType}`"
+                v-model.number="quantities[shipType]"
+                type="number"
+                min="0"
+                placeholder="0"
+                class="text-sm"
+              />
+            </div>
+
+            <div v-if="quantities[shipType] > 0" class="text-xs sm:text-sm space-y-1.5 sm:space-y-2 p-2.5 sm:p-3 bg-muted rounded-lg">
+              <p class="font-medium text-muted-foreground">{{ t('shipyardView.totalCost') }}:</p>
+              <div class="space-y-1 sm:space-y-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="metal" size="sm" />
+                  <span class="text-xs">{{ t('resources.metal') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.metal, getTotalCost(shipType).metal)"
+                  >
+                    {{ formatNumber(getTotalCost(shipType).metal) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="crystal" size="sm" />
+                  <span class="text-xs">{{ t('resources.crystal') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.crystal, getTotalCost(shipType).crystal)"
+                  >
+                    {{ formatNumber(getTotalCost(shipType).crystal) }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ResourceIcon type="deuterium" size="sm" />
+                  <span class="text-xs">{{ t('resources.deuterium') }}:</span>
+                  <span
+                    class="font-medium text-xs sm:text-sm"
+                    :class="getResourceCostColor(planet.resources.deuterium, getTotalCost(shipType).deuterium)"
+                  >
+                    {{ formatNumber(getTotalCost(shipType).deuterium) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Button @click="handleBuild(shipType)" :disabled="!canBuild(shipType)" class="w-full">{{ t('shipyardView.build') }}</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- 提示对话框 -->
+    <AlertDialog ref="alertDialog" />
+  </div>
+</template>
+
+<script setup lang="ts">
+  import { useGameStore } from '@/stores/gameStore'
+  import { useDetailDialogStore } from '@/stores/detailDialogStore'
+  import { useI18n } from '@/composables/useI18n'
+  import { useGameConfig } from '@/composables/useGameConfig'
+  import { computed, ref } from 'vue'
+  import { ShipType, BuildingType } from '@/types/game'
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+  import { Button } from '@/components/ui/button'
+  import { Input } from '@/components/ui/input'
+  import { Label } from '@/components/ui/label'
+  import ResourceIcon from '@/components/ResourceIcon.vue'
+  import AlertDialog from '@/components/AlertDialog.vue'
+  import UnlockRequirement from '@/components/UnlockRequirement.vue'
+  import CardUnlockOverlay from '@/components/CardUnlockOverlay.vue'
+  import { formatNumber, getResourceCostColor } from '@/utils/format'
+  import * as shipValidation from '@/logic/shipValidation'
+  import * as publicLogic from '@/logic/publicLogic'
+
+  const gameStore = useGameStore()
+  const detailDialog = useDetailDialogStore()
+  const { t } = useI18n()
+  const { SHIPS } = useGameConfig()
+  const planet = computed(() => gameStore.currentPlanet)
+  const alertDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
+
+  // 每种舰船的建造数量
+  const quantities = ref<Record<ShipType, number>>({
+    [ShipType.LightFighter]: 0,
+    [ShipType.HeavyFighter]: 0,
+    [ShipType.Cruiser]: 0,
+    [ShipType.Battleship]: 0,
+    [ShipType.SmallCargo]: 0,
+    [ShipType.LargeCargo]: 0,
+    [ShipType.ColonyShip]: 0,
+    [ShipType.Recycler]: 0,
+    [ShipType.EspionageProbe]: 0,
+    [ShipType.DarkMatterHarvester]: 0
+  })
+
+  const buildShip = (shipType: ShipType, quantity: number): boolean => {
+    if (!gameStore.currentPlanet) return false
+    const validation = shipValidation.validateShipBuild(gameStore.currentPlanet, shipType, quantity, gameStore.player.technologies)
+    if (!validation.valid) return false
+    const queueItem = shipValidation.executeShipBuild(gameStore.currentPlanet, shipType, quantity, gameStore.player.officers)
+    gameStore.currentPlanet.buildQueue.push(queueItem)
+    return true
+  }
+
+  // 建造舰船
+  const handleBuild = (shipType: ShipType) => {
+    const quantity = quantities.value[shipType]
+    if (quantity <= 0) {
+      alertDialog.value?.show({
+        title: t('shipyardView.inputError'),
+        message: t('shipyardView.inputErrorMessage')
+      })
+      return
+    }
+
+    const success = buildShip(shipType, quantity)
+    if (!success) {
+      alertDialog.value?.show({
+        title: t('shipyardView.buildFailed'),
+        message: t('shipyardView.buildFailedMessage')
+      })
+    } else {
+      quantities.value[shipType] = 0
+    }
+  }
+
+  // 检查是否可以建造
+  const canBuild = (shipType: ShipType): boolean => {
+    if (!planet.value) return false
+
+    const quantity = quantities.value[shipType]
+    if (quantity <= 0) return false
+
+    const config = SHIPS.value[shipType]
+    const totalCost = {
+      metal: config.cost.metal * quantity,
+      crystal: config.cost.crystal * quantity,
+      deuterium: config.cost.deuterium * quantity
+    }
+
+    return (
+      publicLogic.checkRequirements(planet.value, gameStore.player.technologies, config.requirements) &&
+      planet.value.resources.metal >= totalCost.metal &&
+      planet.value.resources.crystal >= totalCost.crystal &&
+      planet.value.resources.deuterium >= totalCost.deuterium
+    )
+  }
+
+  // 计算总成本
+  const getTotalCost = (shipType: ShipType) => {
+    const quantity = quantities.value[shipType]
+    const config = SHIPS.value[shipType]
+    return {
+      metal: config.cost.metal * quantity,
+      crystal: config.cost.crystal * quantity,
+      deuterium: config.cost.deuterium * quantity
+    }
+  }
+</script>

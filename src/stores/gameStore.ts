@@ -23,7 +23,7 @@ export const useGameStore = defineStore('game', {
     currentPlanetId: '',
     isDark: '',
     locale: 'zh-CN' as Locale,
-    sidebarCollapsed: window.innerWidth < 1024 ? false : true,
+    sidebarCollapsed: window.innerWidth >= 1024,
     universePlanets: {} as Record<string, Planet>
   }),
   getters: {

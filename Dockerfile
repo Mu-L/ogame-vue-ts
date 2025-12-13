@@ -12,7 +12,7 @@ RUN git clone https://github.com/setube/ogame-vue-ts.git
 
 RUN mv ./ogame-vue-ts/* . ; rm -rf ./ogame-vue-ts/
 
-RUN npm install -g pnpm ; pnpm install ; npx vite build
+RUN npm install -g pnpm ; pnpm install --shamefully-hoist; npx vite build
 
 FROM nginx:alpine
 

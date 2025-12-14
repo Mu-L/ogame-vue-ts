@@ -35,14 +35,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.21'
+
       - name: Build Frontend & Server
         run: |
           pnpm install
           pnpm run build
-          [ -f go.mod ] || go mod init ogame-app
           go mod tidy
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w" -o ${{ matrix.executable }} main.go
-      - name: Upload
+
+      - name: Upload Server Binaries
         uses: actions/upload-artifact@v4
         with:
           name: server-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -72,6 +73,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+
       - name: Build Electron
         run: |
           pnpm install
@@ -79,11 +81,12 @@ jobs:
           pnpm run build:electron --${{ matrix.platform }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload
+
+      # 【关键点】这里只上传安装包后缀，不上传文件夹
+      - name: Upload Electron Installers
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ matrix.platform }}
-          # 仅上传 pkg 下的安装包，忽略 unpacked 目录
           path: |
             pkg/*.exe
             pkg/*.dmg
@@ -92,56 +95,35 @@ jobs:
 
   # 3. 发布 Release
   release:
-    needs: [ build-server, build-electron ]
+    needs: [build-server, build-electron]
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 必须确保有写权限
-      pull-requests: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 获取版本号
       - name: Get Version
         id: get_version
-        shell: bash
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+        run: echo "VERSION=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      # 2. 创建 Release (先创建，不上传文件)
-      # 这一步能有效避免 404，确保 Release 实体已存在
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-assets
+          merge-multiple: true
+
       - name: Create GitHub Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
           name: Release ${{ steps.get_version.outputs.VERSION }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 3. 下载产物并上传到已创建的 Release
-      - name: Download and Upload Assets
-        uses: actions/download-artifact@v4
-        with:
-          path: ./downloads
-          merge-multiple: true
-
-      - name: Upload Assets to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          append_body: true
-          # 显式指定文件名，不带版本号
+          # 【核心修复】精确指定文件后缀，避免上传 package.json 或 unpacked 目录
           files: |
-            ./downloads/ogame-server-win.exe
-            ./downloads/ogame-server-linux
-            ./downloads/ogame-server-linux-arm64
-            ./downloads/ogame-Setup.exe
-            ./downloads/*.dmg
-            ./downloads/*.AppImage
-            ./downloads/*.zip
+            ./release-assets/*.exe
+            ./release-assets/*.dmg
+            ./release-assets/*.AppImage
+            ./release-assets/*.zip
+            ./release-assets/ogame-server-*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

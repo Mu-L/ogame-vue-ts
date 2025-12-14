@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  # 1. 构建 Go 服务端 (交叉编译)
+  # 1. 构建 Go 服务端 (包含前端静态资源)
   build-server:
     name: Build Server (${{ matrix.goos }}-${{ matrix.goarch }})
     runs-on: ubuntu-latest
@@ -25,12 +25,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.21'
 
-      - name: Compile Server
+      # 构建服务端前先构建前端
+      - name: Install Frontend Dependencies
+        run: npm install
+
+      - name: Build Frontend (for Go Embed)
+        run: npm run build
+
+      - name: Compile Go Server
         shell: bash
         run: |
           [ -f go.mod ] || go mod init ogame-app
@@ -43,7 +57,7 @@ jobs:
           name: server-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ${{ matrix.executable }}
 
-  # 2. 构建 Electron 客户端 (Node.js 环境)
+  # 2. 构建 Electron 客户端 (输出到 pkg)
   build-electron:
     name: Build Electron (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -65,16 +79,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm' # 如果用 yarn 或 pnpm 请修改此处
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Vue Frontend
+      - name: Build Frontend (for Electron)
         run: npm run build
 
       - name: Build Electron App
-        # 确保 package.json 里的脚本能接收参数，或直接运行打包命令
         run: npm run build:electron -- --${{ matrix.platform }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,7 +96,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: electron-${{ matrix.platform }}
-          # 指向你要求的 pkg 目录
           path: |
             pkg/*.exe
             pkg/*.dmg
@@ -103,7 +115,7 @@ jobs:
         with:
           path: ./release-assets
 
-      - name: Get Version from package.json
+      - name: Get Version
         id: get_version
         shell: bash
         run: |

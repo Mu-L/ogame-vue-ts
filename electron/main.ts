@@ -11,7 +11,10 @@ app.whenReady().then(() => {
     const win = new BrowserWindow({
         title: 'OGame',
         icon: path.join(__dirname, '../public/favicon.ico'),
+        width: 1200,
+        height: 800,
     })
+    win.setMenu(null);
 
     // You can use `process.env.VITE_DEV_SERVER_URL` when the vite command is called `serve`
     if (process.env.VITE_DEV_SERVER_URL) {

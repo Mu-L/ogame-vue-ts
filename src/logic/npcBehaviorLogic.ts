@@ -82,6 +82,12 @@ export const calculateDynamicBehavior = (playerPoints: number): DynamicBehaviorC
  * 检查NPC是否应该侦查玩家
  */
 export const shouldNPCSpyPlayer = (npc: NPC, player: Player, currentTime: number, config: DynamicBehaviorConfig): boolean => {
+  // 新手保护：积分低于1000的玩家不会被侦查
+  const playerPoints = player.points || 0
+  if (playerPoints < 1000) {
+    return false
+  }
+
   const lastSpyTime = npc.lastSpyTime || 0
 
   // 检查是否达到侦查间隔
@@ -110,6 +116,12 @@ export const shouldNPCSpyPlayer = (npc: NPC, player: Player, currentTime: number
  * 检查NPC是否应该攻击玩家
  */
 export const shouldNPCAttackPlayer = (npc: NPC, player: Player, currentTime: number, config: DynamicBehaviorConfig): boolean => {
+  // 新手保护：积分低于1000的玩家不会被攻击
+  const playerPoints = player.points || 0
+  if (playerPoints < 1000) {
+    return false
+  }
+
   const lastAttackTime = npc.lastAttackTime || 0
 
   // 检查是否达到攻击间隔
@@ -117,20 +129,24 @@ export const shouldNPCAttackPlayer = (npc: NPC, player: Player, currentTime: num
     return false
   }
 
-  // 检查外交关系 - 只有中立和敌对NPC才会攻击
+  // 检查外交关系
   const relation = npc.relations?.[player.id]
   if (relation) {
     if (relation.status === RelationStatus.Friendly) {
       // 友好NPC不攻击玩家
       return false
     }
+    if (relation.status === RelationStatus.Neutral) {
+      // 中立NPC有概率攻击玩家（使用正常概率）
+      return Math.random() < config.attackProbability
+    }
     if (relation.status === RelationStatus.Hostile) {
-      // 敌对NPC攻击概率翻倍
+      // 敌对NPC攻击概率翻倍（更激进）
       return Math.random() < Math.min(config.attackProbability * 2.0, 1.0)
     }
   }
 
-  // 中立或无关系：正常概率攻击
+  // 无关系的NPC：使用正常概率攻击
   return Math.random() < config.attackProbability
 }
 

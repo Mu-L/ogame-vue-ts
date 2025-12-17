@@ -29,6 +29,7 @@ export const useGameConfig = () => {
     [BuildingType.RoboticsFactory]: 'roboticsFactory',
     [BuildingType.NaniteFactory]: 'naniteFactory',
     [BuildingType.Shipyard]: 'shipyard',
+    [BuildingType.Hangar]: 'hangar',
     [BuildingType.ResearchLab]: 'researchLab',
     [BuildingType.MetalStorage]: 'metalStorage',
     [BuildingType.CrystalStorage]: 'crystalStorage',

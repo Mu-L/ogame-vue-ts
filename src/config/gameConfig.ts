@@ -130,6 +130,21 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
       12: { [BuildingType.RoboticsFactory]: 8, [BuildingType.ResearchLab]: 8, [BuildingType.NaniteFactory]: 2 }
     }
   },
+  [BuildingType.Hangar]: {
+    id: BuildingType.Hangar,
+    name: '机库',
+    description: '专门用于扩展舰队存储容量，支持星球专业化发展',
+    baseCost: { metal: 200, crystal: 100, deuterium: 50, darkMatter: 0, energy: 0 },
+    baseTime: 20,
+    costMultiplier: 1.8,
+    spaceUsage: 3,
+    fleetStorageBonus: 1500, // 每级增加1500舰队仓储，比船坞更高
+    requirements: { [BuildingType.RoboticsFactory]: 1 }, // 只需要1级机器人工厂
+    levelRequirements: {
+      10: { [BuildingType.RoboticsFactory]: 3 },
+      20: { [BuildingType.RoboticsFactory]: 5 }
+    }
+  },
   [BuildingType.ResearchLab]: {
     id: BuildingType.ResearchLab,
     name: '研究实验室',
@@ -674,13 +689,13 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
   [ShipType.Battleship]: {
     id: ShipType.Battleship,
     name: '战列舰',
-    description: '重型战舰',
+    description: '重型战舰，主力作战单位',
     cost: { metal: 45000, crystal: 15000, deuterium: 0, darkMatter: 0, energy: 0 },
     buildTime: 90,
     cargoCapacity: 1500,
-    attack: 1000,
-    shield: 200,
-    armor: 6000,
+    attack: 1200,
+    shield: 300,
+    armor: 10000,
     speed: 10000,
     fuelConsumption: 500,
     storageUsage: 25,
@@ -728,13 +743,13 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
   [ShipType.Destroyer]: {
     id: ShipType.Destroyer,
     name: '驱逐舰',
-    description: '擅长摧毁大型舰船的猎杀者',
+    description: '专业反大型舰船战舰，高火力低防护',
     cost: { metal: 60000, crystal: 50000, deuterium: 15000, darkMatter: 0, energy: 0 },
     buildTime: 120,
     cargoCapacity: 2000,
-    attack: 2000,
-    shield: 500,
-    armor: 11000,
+    attack: 2500,
+    shield: 250,
+    armor: 8000,
     speed: 5000,
     fuelConsumption: 1000,
     storageUsage: 40,

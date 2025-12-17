@@ -61,14 +61,14 @@ export const calculateDynamicDifficulty = (playerPoints: number): DynamicDifficu
   // 积分区间和对应的难度参数
   if (playerPoints < 1000) {
     // 新手期：0-1,000分
-    // NPC保持30-50%实力，给予充分发展空间
+    // NPC保持30-50%实力，给予充分发展空间，但资源增长速度加快
     const ratio = 0.3 + (playerPoints / 1000) * 0.2
     return {
       powerRatio: ratio,
       checkInterval: 300, // 5分钟
-      resourceGrowthRate: 0.4,
-      buildingGrowthSpeed: 0.4,
-      techGrowthSpeed: 0.4
+      resourceGrowthRate: 0.8, // 从0.4提升到0.8，确保NPC有足够资源发育
+      buildingGrowthSpeed: 0.6, // 从0.4提升到0.6
+      techGrowthSpeed: 0.6 // 从0.4提升到0.6
     }
   } else if (playerPoints < 5000) {
     // 初级期：1,000-5,000分
@@ -77,9 +77,9 @@ export const calculateDynamicDifficulty = (playerPoints: number): DynamicDifficu
     return {
       powerRatio: ratio,
       checkInterval: 240, // 4分钟
-      resourceGrowthRate: 0.6,
-      buildingGrowthSpeed: 0.6,
-      techGrowthSpeed: 0.6
+      resourceGrowthRate: 1.0, // 从0.6提升到1.0，与玩家资源产出相当
+      buildingGrowthSpeed: 0.8, // 从0.6提升到0.8
+      techGrowthSpeed: 0.8 // 从0.6提升到0.8
     }
   } else if (playerPoints < 20000) {
     // 中级期：5,000-20,000分
@@ -559,9 +559,7 @@ export const initializeNPCDiplomacy = (npcs: NPC[]): void => {
   // 为每个NPC随机分配1-2个盟友
   npcs.forEach(npc => {
     // 获取还未建立关系的潜在盟友
-    const potentialAllies = npcs.filter(
-      n => n.id !== npc.id && !npc.allies!.includes(n.id) && !n.allies!.includes(npc.id)
-    )
+    const potentialAllies = npcs.filter(n => n.id !== npc.id && !npc.allies!.includes(n.id) && !n.allies!.includes(npc.id))
 
     if (potentialAllies.length === 0) return
 

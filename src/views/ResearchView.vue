@@ -1,12 +1,12 @@
 <template>
   <div v-if="planet" class="container mx-auto p-4 sm:p-6">
     <!-- 未解锁遮罩 -->
-    <UnlockRequirement :required-building="BuildingType.ResearchLab" :required-level="1" />
+    <!-- <UnlockRequirement :required-building="BuildingType.ResearchLab" :required-level="1" /> -->
 
     <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">{{ t('researchView.title') }}</h1>
 
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      <Card v-for="techType in Object.values(TechnologyType)" :key="techType" class="relative">
+      <Card v-for="techType in Object.values(TechnologyType)" :key="techType" :data-tech="techType" class="relative">
         <CardUnlockOverlay :requirements="TECHNOLOGIES[techType].requirements" :currentLevel="getTechLevel(techType)" />
         <CardHeader>
           <div class="mb-2">
@@ -98,7 +98,6 @@
     AlertDialogHeader,
     AlertDialogTitle
   } from '@/components/ui/alert-dialog'
-  import UnlockRequirement from '@/components/UnlockRequirement.vue'
   import CardUnlockOverlay from '@/components/CardUnlockOverlay.vue'
   import { formatNumber, getResourceCostColor } from '@/utils/format'
   import * as publicLogic from '@/logic/publicLogic'

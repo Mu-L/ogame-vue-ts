@@ -126,6 +126,7 @@ export default {
     roboticsFactory: '机器人工厂',
     naniteFactory: '纳米工厂',
     shipyard: '船坞',
+    hangar: '机库',
     researchLab: '研究实验室',
     metalStorage: '金属仓库',
     crystalStorage: '晶体仓库',
@@ -164,6 +165,7 @@ export default {
     roboticsFactory: '加快建造速度',
     naniteFactory: '增加建造队列数量，每级+1队列（最多10级）',
     shipyard: '建造舰船',
+    hangar: '专门用于扩展舰队存储容量，支持星球专业化发展',
     researchLab: '研究科技',
     metalStorage: '增加金属存储上限',
     crystalStorage: '增加晶体存储上限',
@@ -198,10 +200,10 @@ export default {
     lightFighter: '基础战斗单位',
     heavyFighter: '重装战斗机',
     cruiser: '中型战舰，攻守平衡',
-    battleship: '强力战舰',
+    battleship: '主力重型战舰，拥有强大的火力和防护',
     battlecruiser: '快速强大的战斗舰船，擅长攻击战列舰',
     bomber: '专门对付防御设施的轰炸舰',
-    destroyer: '擅长摧毁大型舰船的猎杀者',
+    destroyer: '专业反大型舰船战舰，高火力低防护',
     smallCargo: '运输少量资源',
     largeCargo: '运输大量资源',
     colonyShip: '用于殖民新星球',
@@ -313,11 +315,14 @@ export default {
     darkMatterSpecialist: '提升暗物质采集效率'
   },
   queue: {
+    title: '建造队列',
+    empty: '当前没有进行中的任务',
     buildQueueBonus: '建造队列',
     spaceBonus: '空间加成',
     researchQueueBonus: '研究队列',
     building: '建造中',
     researching: '研究中',
+    demolishing: '拆除中',
     remaining: '剩余时间',
     cancel: '取消',
     cancelBuild: '取消建造',
@@ -576,10 +581,12 @@ export default {
     battles: '战斗',
     spy: '侦查',
     npc: 'NPC',
+    diplomacy: '',
     battleReports: '战斗报告',
     spyReports: '间谍报告',
     noBattleReports: '暂无战斗报告',
     noSpyReports: '暂无间谍报告',
+    noDiplomaticReports: '',
     battleReport: '战斗报告',
     spyReport: '间谍报告',
     victory: '胜利',
@@ -635,7 +642,38 @@ export default {
       hostile: '对方对你有敌意，不接受礼物',
       neutral_distrust: '对方对你缺乏信任',
       polite_decline: '对方礼貌地拒绝了'
-    }
+    },
+    // 被侦查通知对话框
+    spiedNotificationDetails: '被侦查通知详情',
+    spyDetected: '侦查被发现',
+    detectionResult: '检测结果',
+    detectionSuccess: '你的侦查探测被发现了！',
+    spiedNotificationMessage: '{npc}试图侦查你的星球{planet}',
+    spiedNotificationTip: '考虑增强防御或反击，如果这个NPC对你有敌意',
+    viewInGalaxy: '在星系中查看',
+    // 任务报告对话框
+    missionReportDetails: '任务报告详情',
+    missionSuccess: '成功',
+    missionFailed: '失败',
+    origin: '起点',
+    destination: '终点',
+    missionDetails: '任务详情',
+    transportedResources: '运输资源',
+    recycledResources: '回收资源',
+    remainingDebris: '剩余残骸',
+    newPlanet: '新星球',
+    // NPC活动对话框
+    npcActivityDetails: 'NPC活动详情',
+    activityType: {
+      recycle: '回收残骸'
+    },
+    activityLocation: '活动位置',
+    position: '位置',
+    nearPlanet: '附近星球',
+    activityDescription: '活动描述',
+    npcActivityMessage: '{npc}正在{position}{activity}',
+    arrivalTime: '到达时间',
+    npcActivityTip: 'NPC可能会收集战斗产生的残骸。如果你想竞争资源，可以尝试先到达该位置'
   },
   missionReports: {
     transportSuccess: '运输任务成功完成',
@@ -801,7 +839,8 @@ export default {
     completeAllQueues: '一键完成所有队列',
     completeAllQueuesDesc: '立即完成所有建筑、科技、舰船、防御队列和飞行任务',
     completeQueues: '完成队列',
-    completeQueuesSuccess: '已完成 {buildingCount} 个建筑队列、{researchCount} 个科技队列、{missionCount} 个飞行任务、{missileCount} 个导弹任务'
+    completeQueuesSuccess:
+      '已完成 {buildingCount} 个建筑队列、{researchCount} 个科技队列、{missionCount} 个飞行任务、{missileCount} 个导弹任务'
   },
   alerts: {
     npcSpyIncoming: 'NPC侦查即将到达',
@@ -831,6 +870,10 @@ export default {
     recentEvents: '最近事件',
     recentEventsDescription: '最近的外交活动记录',
     ago: '前',
+    notifications: '外交通知',
+    markAllRead: '全部已读',
+    noReports: '暂无外交事件',
+    viewAll: '查看全部',
     status: {
       friendly: '友好',
       neutral: '中立',
@@ -846,6 +889,13 @@ export default {
       viewPlanets: '查看星球'
     },
     lastEvent: '最近活动',
+    reportDetails: '外交报告详情',
+    eventDescription: '事件描述',
+    reputationChange: '好感度变化',
+    before: '之前',
+    after: '之后',
+    statusChange: '关系状态变化',
+    viewDiplomacy: '查看外交页面',
     events: {
       gift: '赠送资源',
       attack: '攻击',
@@ -873,7 +923,14 @@ export default {
       receivedGiftFromNpc: '收到了{npcName}的礼物',
       acceptedGiftFromNpc: '你接受了{npcName}的礼物：{metal}金属 {crystal}晶体 {deuterium}氘',
       playerRejectedGift: '玩家拒绝了礼物',
-      rejectedGiftFromNpc: '你拒绝了{npcName}的礼物。好感度{reputation}'
+      rejectedGiftFromNpc: '你拒绝了{npcName}的礼物。好感度{reputation}',
+      destroyedNpcPlanet: '摧毁了{npcName}的{planetName}',
+      playerDestroyedPlanet: '玩家摧毁了{planetName}',
+      youDestroyedNpcPlanet: '你摧毁了{npcName}的{planetName}。好感度{reputation}',
+      playerDestroyedAllyPlanet: '玩家摧毁了盟友{allyName}的{planetName}',
+      allyOutraged: '{allyName}对你摧毁盟友{targetName}的{planetName}感到愤怒',
+      npcEliminated: 'NPC {npcName}已被彻底消灭',
+      npcEliminatedMessage: '你消灭了{npcName}的所有星球！该势力已被彻底摧毁。'
     }
   },
   pagination: {
@@ -887,5 +944,144 @@ export default {
     title: '页面未找到',
     description: '抱歉，您访问的页面不存在',
     goHome: '返回首页'
+  },
+  time: {
+    days: '天',
+    hours: '小时',
+    minutes: '分钟',
+    seconds: '秒'
+  },
+  tutorial: {
+    progress: '进度',
+    previous: '上一步',
+    next: '下一步',
+    gotIt: '我知道了',
+    completeButton: '完成',
+    skip: '跳过引导',
+    welcome: {
+      title: '欢迎来到 OGame',
+      content: '欢迎，指挥官！本教程将引导您了解建立帝国的基础知识。点击"下一步"开始您的征程。'
+    },
+    resources: {
+      title: '资源概览',
+      content: '这些是您的资源：金属、晶体和重氢。它们是建造建筑和研究科技的必需品。能量也很重要，用于为您的基础设施供电。'
+    },
+    planet: {
+      title: '您的星球',
+      content: '这是您的母星。您可以在这里查看星球名称、坐标，并在扩张帝国时切换星球。'
+    },
+    navigation: {
+      title: '导航菜单',
+      content: '使用此菜单在不同部分之间导航：建筑、研究、舰队、星系等。每个部分都提供独特的游戏功能。'
+    },
+    gotoBuildings: {
+      title: '前往建筑页面',
+      content: '让我们从建造一些建筑开始。点击"建筑"菜单项查看可用建筑。'
+    },
+    buildSolarPlant: {
+      title: '建造太阳能电站',
+      content: '首先建造太阳能电站！它为您的星球提供能量。没有能量，其他资源建筑无法运作。这是最重要的第一步。'
+    },
+    waitBuild: {
+      title: '建造队列',
+      content:
+        '您的建筑现在在建造队列中。点击右上角的队列图标可以查看所有正在进行的建造和研究任务。建筑需要时间完成，但您可以在等待时继续操作。'
+    },
+    buildMetalMine: {
+      title: '建造金属矿',
+      content: '现在有了能量，可以建造金属矿了。金属矿是您的主要金属来源，金属几乎用于每个建筑和舰船。'
+    },
+    buildCrystalMine: {
+      title: '建造晶体矿',
+      content: '晶体更稀有但对高级科技至关重要。建造晶体矿开始收集这种宝贵的资源。'
+    },
+    buildDeuterium: {
+      title: '建造重氢合成器',
+      content: '重氢是舰船燃料和高级研究的必需品。建造重氢合成器开始生产这种关键资源。'
+    },
+    upgradeMines: {
+      title: '升级资源矿',
+      content: '接下来，您需要升级三种资源矿（金属、晶体、重氢）到2级，以满足建造机器人工厂的要求。资源充足后，继续升级它们。'
+    },
+    buildRobotics: {
+      title: '建造机器人工厂',
+      content: '机器人工厂可以大幅加快建造速度。它需要金属矿、晶体矿和重氢合成器各达到2级。建造它来提升建造效率！'
+    },
+    upgradeMinesForLab: {
+      title: '继续升级资源矿',
+      content: '现在需要将三种资源矿升级到3级，以满足研究实验室的建造要求。继续发展您的资源产能。'
+    },
+    buildResearchLab: {
+      title: '建造研究实验室',
+      content: '研究实验室是技术进步的基础。它需要三种资源矿各达到3级。建造它以解锁科技研究！'
+    },
+    gotoResearch: {
+      title: '前往研究页面',
+      content: '既然您有了研究实验室，点击"研究"菜单查看可用的科技。'
+    },
+    researchEnergy: {
+      title: '研究能量科技',
+      content: '能量科技可以提高您的能量产出并解锁高级建筑。这是最基础也是最重要的科技之一。'
+    },
+    shipyardIntro: {
+      title: '舰队与船坞',
+      content: '舰船让您能够探索星系、运输资源并保卫您的帝国。要建造舰船，您需要船坞（需要机器人工厂2级）。'
+    },
+    gotoBuildingsForShipyard: {
+      title: '返回建筑页面',
+      content: '返回建筑页面来建造您的船坞。'
+    },
+    buildShipyard: {
+      title: '建造船坞',
+      content: '船坞允许您建造舰船和防御系统。这对舰队行动至关重要。'
+    },
+    fleetIntro: {
+      title: '舰队行动',
+      content: '一旦您拥有舰船，就可以派遣它们执行任务：运输资源、殖民星球、攻击敌人或探索废墟场。'
+    },
+    galaxyIntro: {
+      title: '探索星系',
+      content: '星系视图显示其他星球、废墟场和扩张机会。使用它来侦察目标并规划您的战略。'
+    },
+    complete: {
+      title: '教程完成！',
+      content:
+        '恭喜，指挥官！您现在了解了基础知识。继续建设您的帝国，研究科技，探索星系。记住：先发展能量，再建资源，然后是工厂和研究！祝您好运！'
+    },
+    // 移动端教程
+    mobile: {
+      welcome: {
+        title: '欢迎来到 OGame（移动版）',
+        content: '欢迎，指挥官！这是专为触摸屏设计的简化教程。我们将快速介绍核心功能，让您开始建设帝国。'
+      },
+      resources: {
+        title: '顶部资源栏',
+        content: '顶部显示您的资源：金属、晶体和重氢。点击可查看详细生产信息。'
+      },
+      menu: {
+        title: '打开导航菜单',
+        content: '点击这个菜单图标打开导航栏，您可以访问建筑、研究、舰队等所有功能。'
+      },
+      gotoBuildings: {
+        title: '前往建筑页面',
+        content: '菜单已打开！现在点击"建筑"选项，开始建造基础设施。'
+      },
+      buildSolarPlant: {
+        title: '建造太阳能电站',
+        content: '首先建造太阳能电站！向下滚动找到它，点击卡片进行建造。能量是一切的基础。'
+      },
+      waitBuild: {
+        title: '建造队列',
+        content: '点击右上角的队列图标可以查看建造进度。您可以继续浏览其他页面，建造会在后台进行。'
+      },
+      buildMetalMine: {
+        title: '建造金属矿',
+        content: '有了能量后，建造金属矿。向下滚动找到金属矿，点击建造。'
+      },
+      complete: {
+        title: '快速教程完成！',
+        content: '很好！您已经掌握了基础操作。继续建造晶体矿和重氢合成器，然后探索其他功能。记住：先能量，再资源！'
+      }
+    }
   }
 }

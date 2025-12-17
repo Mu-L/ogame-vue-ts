@@ -24,6 +24,7 @@ export const BuildingType = {
   RoboticsFactory: 'roboticsFactory',
   NaniteFactory: 'naniteFactory', // 纳米工厂
   Shipyard: 'shipyard',
+  Hangar: 'hangar', // 机库
   ResearchLab: 'researchLab',
   MetalStorage: 'metalStorage',
   CrystalStorage: 'crystalStorage',
@@ -227,7 +228,8 @@ export const DiplomaticEventType = {
   Attack: 'attack', // 攻击
   Spy: 'spy', // 侦查
   StealDebris: 'stealDebris', // 抢夺残骸
-  AllyAttacked: 'allyAttacked' // 盟友被攻击
+  AllyAttacked: 'allyAttacked', // 盟友被攻击
+  DestroyPlanet: 'destroyPlanet' // 摧毁星球
 } as const
 
 export type DiplomaticEventType = (typeof DiplomaticEventType)[keyof typeof DiplomaticEventType]
@@ -259,7 +261,9 @@ export interface DiplomaticReport {
   newReputation: number // 新的好感度值
   oldStatus: RelationStatus // 旧的关系状态
   newStatus: RelationStatus // 新的关系状态
-  message: string // 消息内容
+  message: string // 消息内容（已弃用，保留用于兼容性）
+  messageKey?: string // 翻译键（如 'diplomacy.reports.youDestroyedNpcPlanet'）
+  messageParams?: Record<string, string | number> // 翻译参数（如 { npcName: 'NPC-1', planetName: '星球 1:1:8', reputation: -80 }）
   read?: boolean // 已读状态
 }
 
@@ -568,6 +572,8 @@ export interface Player {
   // 外交系统字段
   diplomaticRelations?: Record<string, DiplomaticRelation> // 玩家对NPC的关系（key: npcId）
   diplomaticReports?: DiplomaticReport[] // 外交变化报告
+  // 新手引导字段
+  tutorialProgress?: TutorialProgress // 新手引导进度
 }
 
 // 游戏状态
@@ -615,4 +621,34 @@ export interface NPC {
   relations?: Record<string, DiplomaticRelation> // NPC对其他实体的关系（key: targetId）
   allies?: string[] // 盟友列表（NPC ID）
   enemies?: string[] // 敌人列表（NPC ID）
+}
+
+// 新手引导系统
+export interface TutorialStep {
+  id: string
+  title: string // 标题
+  content: string // 内容描述
+  target?: string // 目标元素的选择器或ID
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'center' // 提示框位置
+  route?: string // 需要跳转的路由
+  action?: 'click' | 'build' | 'research' | 'none' // 需要完成的操作类型
+  actionTarget?: string // 操作目标（建筑ID、科技ID等）
+  completionCheck?: () => boolean // 完成条件检查函数（运行时注入）
+  canSkip?: boolean // 是否可跳过此步骤
+  highlightPadding?: number // 高亮区域的padding
+}
+
+export interface TutorialState {
+  isActive: boolean // 引导是否激活
+  currentStepIndex: number // 当前步骤索引
+  completedSteps: string[] // 已完成的步骤ID列表
+  skipped: boolean // 是否已跳过整个引导
+  lastActiveTime?: number // 最后活跃时间
+}
+
+export interface TutorialProgress {
+  tutorialCompleted: boolean // 是否完成了整个引导
+  completedStepIds: string[] // 已完成的步骤ID
+  currentStep: string | null // 当前步骤ID
+  skippedAt?: number // 跳过的时间戳
 }

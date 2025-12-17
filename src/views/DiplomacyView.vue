@@ -12,7 +12,12 @@
       <TabsList class="grid w-full grid-cols-4">
         <TabsTrigger value="all">
           {{ t('diplomacy.tabs.all') }}
-          <Badge variant="outline" class="ml-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700">{{ allNpcs.length }}</Badge>
+          <Badge
+            variant="outline"
+            class="ml-2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
+          >
+            {{ allNpcs.length }}
+          </Badge>
         </TabsTrigger>
         <TabsTrigger value="friendly">
           {{ t('diplomacy.tabs.friendly') }}
@@ -50,7 +55,13 @@
         </div>
         <template v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NpcRelationCard v-for="npc in paginatedAllNpcs" :key="npc.id" :npc="npc" :relation="getRelation(npc.id)" />
+            <NpcRelationCard
+              v-for="npc in paginatedAllNpcs"
+              :key="npc.id"
+              :npc="npc"
+              :relation="getRelation(npc.id)"
+              :data-npc-id="npc.id"
+            />
           </div>
           <Pagination
             v-if="totalPagesAll > 1"
@@ -84,7 +95,13 @@
         </div>
         <template v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NpcRelationCard v-for="npc in paginatedFriendlyNpcs" :key="npc.id" :npc="npc" :relation="getRelation(npc.id)" />
+            <NpcRelationCard
+              v-for="npc in paginatedFriendlyNpcs"
+              :key="npc.id"
+              :npc="npc"
+              :relation="getRelation(npc.id)"
+              :data-npc-id="npc.id"
+            />
           </div>
           <Pagination
             v-if="totalPagesFriendly > 1"
@@ -118,7 +135,13 @@
         </div>
         <template v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NpcRelationCard v-for="npc in paginatedNeutralNpcs" :key="npc.id" :npc="npc" :relation="getRelation(npc.id)" />
+            <NpcRelationCard
+              v-for="npc in paginatedNeutralNpcs"
+              :key="npc.id"
+              :npc="npc"
+              :relation="getRelation(npc.id)"
+              :data-npc-id="npc.id"
+            />
           </div>
           <Pagination
             v-if="totalPagesNeutral > 1"
@@ -152,7 +175,13 @@
         </div>
         <template v-else>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NpcRelationCard v-for="npc in paginatedHostileNpcs" :key="npc.id" :npc="npc" :relation="getRelation(npc.id)" />
+            <NpcRelationCard
+              v-for="npc in paginatedHostileNpcs"
+              :key="npc.id"
+              :npc="npc"
+              :relation="getRelation(npc.id)"
+              :data-npc-id="npc.id"
+            />
           </div>
           <Pagination
             v-if="totalPagesHostile > 1"
@@ -179,57 +208,20 @@
         </template>
       </TabsContent>
     </Tabs>
-
-    <!-- 外交报告历史 -->
-    <Card v-if="diplomaticReports.length > 0">
-      <CardHeader>
-        <CardTitle>{{ t('diplomacy.recentEvents') }}</CardTitle>
-        <CardDescription>{{ t('diplomacy.recentEventsDescription') }}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-2 max-h-96 overflow-y-auto">
-          <div
-            v-for="report in diplomaticReports"
-            :key="report.id"
-            class="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-          >
-            <div class="flex-shrink-0 mt-0.5">
-              <component :is="getEventIcon(report.eventType)" class="h-5 w-5" :class="getEventIconColor(report.reputationChange)" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-medium">{{ report.npcName }}</span>
-                <Badge :variant="getReputationBadgeVariant(report.reputationChange)" class="text-xs">
-                  {{ report.reputationChange > 0 ? '+' : '' }}{{ report.reputationChange }}
-                </Badge>
-                <Badge :variant="getStatusBadgeVariant(report.newStatus)" class="text-xs">
-                  {{ getStatusText(report.newStatus) }}
-                </Badge>
-              </div>
-              <p class="text-sm text-muted-foreground">{{ report.message }}</p>
-              <p class="text-xs text-muted-foreground mt-1">{{ formatTime(Date.now() - report.timestamp) }} {{ t('diplomacy.ago') }}</p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, onMounted } from 'vue'
+  import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
   import { useGameStore } from '@/stores/gameStore'
   import { useNPCStore } from '@/stores/npcStore'
   import { useI18n } from '@/composables/useI18n'
-  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
   import { Badge } from '@/components/ui/badge'
   import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
   import NpcRelationCard from '@/components/NpcRelationCard.vue'
-  import { Gift, Sword, Eye, Trash2 } from 'lucide-vue-next'
-  import { RelationStatus, DiplomaticEventType } from '@/types/game'
-  import type { DiplomaticRelation, DiplomaticReport } from '@/types/game'
-  import { formatTime } from '@/utils/format'
+  import { RelationStatus } from '@/types/game'
+  import type { DiplomaticRelation } from '@/types/game'
 
   const gameStore = useGameStore()
   const npcStore = useNPCStore()
@@ -281,6 +273,49 @@
   // 组件挂载时初始化NPC盟友
   onMounted(() => {
     initializeNPCAllies()
+
+    // 监听滚动到NPC卡片的事件
+    const handleScrollToNpc = (event: Event) => {
+      const customEvent = event as CustomEvent<{ npcId: string }>
+      const npcId = customEvent.detail.npcId
+
+      // 切换到"全部"标签
+      activeTab.value = 'all'
+
+      // 等待DOM更新后再滚动
+      nextTick(() => {
+        // 找到目标NPC在列表中的索引
+        const npcIndex = allNpcs.value.findIndex(npc => npc.id === npcId)
+        if (npcIndex === -1) return
+
+        // 计算目标NPC所在的页面
+        const targetPage = Math.floor(npcIndex / ITEMS_PER_PAGE) + 1
+        currentPage.value.all = targetPage
+
+        // 再次等待分页更新后滚动到卡片
+        nextTick(() => {
+          // 使用data属性来标识卡片
+          const cards = document.querySelectorAll('[data-npc-id]')
+          const targetCard = Array.from(cards).find(card => card.getAttribute('data-npc-id') === npcId)
+
+          if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // 添加高亮效果
+            targetCard.classList.add('ring-2', 'ring-primary', 'ring-offset-2')
+            setTimeout(() => {
+              targetCard.classList.remove('ring-2', 'ring-primary', 'ring-offset-2')
+            }, 2000)
+          }
+        })
+      })
+    }
+
+    document.addEventListener('scrollToNpc', handleScrollToNpc)
+
+    // 清理事件监听器
+    onUnmounted(() => {
+      document.removeEventListener('scrollToNpc', handleScrollToNpc)
+    })
   })
 
   // 分页状态
@@ -387,65 +422,4 @@
   const pageNumbersFriendly = computed(() => getPageNumbers(currentPage.value.friendly || 1, totalPagesFriendly.value))
   const pageNumbersNeutral = computed(() => getPageNumbers(currentPage.value.neutral || 1, totalPagesNeutral.value))
   const pageNumbersHostile = computed(() => getPageNumbers(currentPage.value.hostile || 1, totalPagesHostile.value))
-
-  // 外交报告（最近20条，按时间倒序）
-  const diplomaticReports = computed(() => {
-    const reports = gameStore.player.diplomaticReports || []
-    return [...reports].sort((a, b) => b.timestamp - a.timestamp).slice(0, 20)
-  })
-
-  // 获取事件图标
-  const getEventIcon = (eventType: DiplomaticReport['eventType']) => {
-    switch (eventType) {
-      case DiplomaticEventType.GiftResources:
-        return Gift
-      case DiplomaticEventType.Attack:
-      case DiplomaticEventType.AllyAttacked:
-        return Sword
-      case DiplomaticEventType.Spy:
-        return Eye
-      case DiplomaticEventType.StealDebris:
-        return Trash2
-      default:
-        return Gift
-    }
-  }
-
-  // 获取事件图标颜色
-  const getEventIconColor = (reputationChange: number) => {
-    if (reputationChange > 0) return 'text-green-600 dark:text-green-400'
-    if (reputationChange < 0) return 'text-red-600 dark:text-red-400'
-    return 'text-muted-foreground'
-  }
-
-  // 获取好感度Badge样式
-  const getReputationBadgeVariant = (change: number) => {
-    if (change > 0) return 'default'
-    if (change < 0) return 'destructive'
-    return 'secondary'
-  }
-
-  // 获取关系状态Badge样式
-  const getStatusBadgeVariant = (status: RelationStatus) => {
-    switch (status) {
-      case RelationStatus.Friendly:
-        return 'default'
-      case RelationStatus.Hostile:
-        return 'destructive'
-      default:
-        return 'secondary'
-    }
-  }
-
-  // 获取关系状态文本
-  const getStatusText = (status: RelationStatus) => {
-    switch (status) {
-      case RelationStatus.Friendly:
-        return t('diplomacy.status.friendly')
-      case RelationStatus.Hostile:
-        return t('diplomacy.status.hostile')
-      default:
-        return t('diplomacy.status.neutral')
-    }
-  }
 </script>

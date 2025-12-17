@@ -115,23 +115,27 @@ export const updatePlanetResources = (
     darkMatterProductionBonus: number
     energyProductionBonus: number
     storageCapacityBonus: number
-  }
+  },
+  gameSpeed: number = 1
 ): void => {
   const timeDiff = (now - planet.lastUpdate) / 1000 // 转换为秒
+
+  // 应用游戏速度到时间差（游戏速度影响资源产出速率）
+  const effectiveTimeDiff = timeDiff * gameSpeed
 
   // 计算能量消耗（每小时）
   const energyConsumption = calculateEnergyConsumption(planet)
 
   // 先增加能量产出
   const energyProduction = calculateEnergyProduction(planet, { energyProductionBonus: bonuses.energyProductionBonus })
-  planet.resources.energy += (energyProduction * timeDiff) / 3600
+  planet.resources.energy += (energyProduction * effectiveTimeDiff) / 3600
 
   // 限制能量上限
   const capacity = calculateResourceCapacity(planet, bonuses.storageCapacityBonus)
   planet.resources.energy = Math.min(planet.resources.energy, capacity.energy)
 
   // 扣除能量消耗
-  planet.resources.energy -= (energyConsumption * timeDiff) / 3600
+  planet.resources.energy -= (energyConsumption * effectiveTimeDiff) / 3600
 
   // 能量不能为负数，最低为0
   planet.resources.energy = Math.max(0, planet.resources.energy)
@@ -143,11 +147,11 @@ export const updatePlanetResources = (
     energyProductionBonus: bonuses.energyProductionBonus
   })
 
-  // 更新资源（转换为每秒产量）
-  planet.resources.metal += (production.metal * timeDiff) / 3600
-  planet.resources.crystal += (production.crystal * timeDiff) / 3600
-  planet.resources.deuterium += (production.deuterium * timeDiff) / 3600
-  planet.resources.darkMatter += (production.darkMatter * timeDiff) / 3600
+  // 更新资源（转换为每秒产量，应用游戏速度）
+  planet.resources.metal += (production.metal * effectiveTimeDiff) / 3600
+  planet.resources.crystal += (production.crystal * effectiveTimeDiff) / 3600
+  planet.resources.deuterium += (production.deuterium * effectiveTimeDiff) / 3600
+  planet.resources.darkMatter += (production.darkMatter * effectiveTimeDiff) / 3600
 
   // 限制资源上限
   planet.resources.metal = Math.min(planet.resources.metal, capacity.metal)

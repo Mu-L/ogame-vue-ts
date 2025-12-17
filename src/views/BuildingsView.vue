@@ -29,7 +29,7 @@
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      <Card v-for="buildingType in availableBuildings" :key="buildingType" class="relative">
+      <Card v-for="buildingType in availableBuildings" :key="buildingType" :data-building="buildingType" class="relative">
         <!-- 前置条件遮罩 -->
         <CardUnlockOverlay :requirements="BUILDINGS[buildingType].requirements" :currentLevel="getBuildingLevel(buildingType)" />
 
@@ -225,18 +225,18 @@
     })
   })
 
-  const upgradeBuilding = (buildingType: BuildingType): boolean => {
-    if (!gameStore.currentPlanet) return false
+  const upgradeBuilding = (buildingType: BuildingType): { success: boolean; reason?: string } => {
+    if (!gameStore.currentPlanet) return { success: false }
     const validation = buildingValidation.validateBuildingUpgrade(
       gameStore.currentPlanet,
       buildingType,
       gameStore.player.technologies,
       gameStore.player.officers
     )
-    if (!validation.valid) return false
+    if (!validation.valid) return { success: false, reason: validation.reason }
     const queueItem = buildingValidation.executeBuildingUpgrade(gameStore.currentPlanet, buildingType, gameStore.player.officers)
     gameStore.currentPlanet.buildQueue.push(queueItem)
-    return true
+    return { success: true }
   }
 
   const getUsedSpace = (planet: Planet): number => {
@@ -253,10 +253,10 @@
       return
     }
 
-    const success = upgradeBuilding(buildingType)
-    if (!success) {
+    const result = upgradeBuilding(buildingType)
+    if (!result.success) {
       alertDialogTitle.value = t('buildingsView.upgradeFailed')
-      alertDialogMessage.value = t('buildingsView.upgradeFailedMessage')
+      alertDialogMessage.value = result.reason ? t(result.reason) : t('buildingsView.upgradeFailedMessage')
       alertDialogOpen.value = true
     }
   }

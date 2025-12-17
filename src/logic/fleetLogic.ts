@@ -36,9 +36,10 @@ export const calculateDistance = (
 
 /**
  * 计算飞行时间
+ * 平衡后的时间倍率，确保游戏节奏合理
  */
 export const calculateFlightTime = (distance: number, minSpeed: number): number => {
-  return Math.max(10, Math.floor((distance * 10000) / minSpeed)) // 至少10秒
+  return Math.max(10, Math.floor((distance * 50) / minSpeed)) // 至少10秒
 }
 
 /**
@@ -717,7 +718,8 @@ export const updateFleetMissions = async (
   attacker: Player,
   defender: Player | null,
   now: number,
-  allNpcs?: NPC[]
+  allNpcs?: NPC[],
+  locale?: Locale
 ): Promise<{
   completedMissions: string[]
   battleReports: BattleResult[]
@@ -767,7 +769,24 @@ export const updateFleetMissions = async (
               planets.set(moonKey, attackResult.moon)
             }
             if (attackResult.debrisField) {
-              newDebrisFields.push(attackResult.debrisField)
+              // 检查该位置是否已存在残骸场
+              const existingDebris = debrisFields.get(attackResult.debrisField.id)
+              if (existingDebris) {
+                // 累加残骸资源
+                const updatedDebris: DebrisField = {
+                  ...existingDebris,
+                  resources: {
+                    metal: existingDebris.resources.metal + attackResult.debrisField.resources.metal,
+                    crystal: existingDebris.resources.crystal + attackResult.debrisField.resources.crystal
+                  }
+                }
+                debrisFields.set(attackResult.debrisField.id, updatedDebris)
+                updatedDebrisFields.push(updatedDebris)
+              } else {
+                // 新建残骸场
+                debrisFields.set(attackResult.debrisField.id, attackResult.debrisField)
+                newDebrisFields.push(attackResult.debrisField)
+              }
             }
           }
           break
@@ -821,6 +840,15 @@ export const updateFleetMissions = async (
           if (destroyResult && destroyResult.success && destroyResult.planetId) {
             // 星球被摧毁
             destroyedPlanetIds.push(destroyResult.planetId)
+
+            // 处理外交关系（如果目标是NPC星球）
+            if (targetPlanet && targetPlanet.ownerId && allNpcs && locale) {
+              const planetOwner = allNpcs.find(npc => npc.id === targetPlanet.ownerId)
+              if (planetOwner) {
+                diplomaticLogic.handlePlanetDestructionReputation(attacker, targetPlanet, planetOwner, allNpcs, locale)
+              }
+            }
+
             planets.delete(targetKey)
           }
           break

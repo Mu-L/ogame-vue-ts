@@ -175,15 +175,21 @@
         <CardContent class="space-y-2">
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.metal') }}:</span>
-            <span class="font-medium"><NumberWithTooltip :value="totalStats.metal" /></span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.metal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.crystal') }}:</span>
-            <span class="font-medium"><NumberWithTooltip :value="totalStats.crystal" /></span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.crystal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.deuterium') }}:</span>
-            <span class="font-medium"><NumberWithTooltip :value="totalStats.deuterium" /></span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.deuterium" />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -305,11 +311,15 @@
             class="flex items-center justify-between text-sm"
           >
             <span class="text-muted-foreground">{{ t(`resources.${resourceType.key}`) }}:</span>
-            <span class="font-medium"><NumberWithTooltip :value="unitCost[resourceType.key]" /></span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="unitCost[resourceType.key]" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm pt-2 border-t">
             <span class="text-muted-foreground">{{ t('player.points') }}:</span>
-            <span class="font-bold text-primary"><NumberWithTooltip :value="pointsPerUnit" /></span>
+            <span class="font-bold text-primary">
+              <NumberWithTooltip :value="pointsPerUnit" />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -341,15 +351,21 @@
             <div class="space-y-1 text-sm">
               <div class="flex justify-between">
                 <span>{{ t('resources.metal') }}:</span>
-                <span class="font-medium"><NumberWithTooltip :value="batchCost.metal" /></span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.metal" />
+                </span>
               </div>
               <div class="flex justify-between">
                 <span>{{ t('resources.crystal') }}:</span>
-                <span class="font-medium"><NumberWithTooltip :value="batchCost.crystal" /></span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.crystal" />
+                </span>
               </div>
               <div class="flex justify-between">
                 <span>{{ t('resources.deuterium') }}:</span>
-                <span class="font-medium"><NumberWithTooltip :value="batchCost.deuterium" /></span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.deuterium" />
+                </span>
               </div>
             </div>
           </div>
@@ -470,7 +486,7 @@
   const showFleetStorageColumn = computed(() => {
     if (props.type === 'building') {
       const buildingType = props.itemType as BuildingType
-      return buildingType === 'shipyard'
+      return buildingType === 'shipyard' || buildingType === 'hangar'
     } else if (props.type === 'technology') {
       const techType = props.itemType as TechnologyType
       return techType === 'computerTechnology'
@@ -662,43 +678,84 @@
       const storageBonus = 1 + (activeBonuses.value.storageCapacityBonus || 0) / 100
       const baseCapacity = 10000
 
-      if (buildingType === 'metalMine') {
-        production = Math.floor(1500 * level * Math.pow(1.5, level) * resourceBonus)
-        consumption = Math.floor(10 * level * Math.pow(1.1, level))
-      } else if (buildingType === 'crystalMine') {
-        production = Math.floor(1000 * level * Math.pow(1.5, level) * resourceBonus)
-        consumption = Math.floor(10 * level * Math.pow(1.1, level))
-      } else if (buildingType === 'deuteriumSynthesizer') {
-        production = Math.floor(500 * level * Math.pow(1.5, level) * resourceBonus)
-        consumption = Math.floor(10 * level * Math.pow(1.1, level))
-      } else if (buildingType === 'solarPlant') {
-        production = Math.floor(50 * level * Math.pow(1.1, level) * energyBonus)
-      } else if (buildingType === 'metalStorage') {
-        capacity = Math.floor(baseCapacity * Math.pow(2, level) * storageBonus)
-      } else if (buildingType === 'crystalStorage') {
-        capacity = Math.floor(baseCapacity * Math.pow(2, level) * storageBonus)
-      } else if (buildingType === 'deuteriumTank') {
-        capacity = Math.floor(baseCapacity * Math.pow(2, level) * storageBonus)
-      } else if (buildingType === 'darkMatterCollector') {
-        capacity = 1000 + level * 100
-        production = Math.floor(25 * level * Math.pow(1.5, level))
-      } else if (buildingType === 'darkMatterTank') {
-        const darkMatterBaseCapacity = 1000
-        capacity = Math.floor(darkMatterBaseCapacity * Math.pow(2, level) * storageBonus)
-      } else if (buildingType === 'fusionReactor') {
-        production = Math.floor(150 * level * Math.pow(1.15, level))
-      } else if (buildingType === 'shipyard') {
-        fleetStorage = 1000 * level
-      } else if (buildingType === 'terraformer') {
-        spaceBonus = 30
-      } else if (buildingType === 'lunarBase') {
-        spaceBonus = 30
-      } else if (buildingType === 'roboticsFactory') {
-        buildSpeedBonus = level
-      } else if (buildingType === 'naniteFactory') {
-        buildSpeedBonus = level * 2
-      } else if (buildingType === 'researchLab') {
-        researchSpeedBonus = level
+      // Building calculation configuration
+      const buildingCalculations: Record<string, (level: number) => Partial<{
+        production: number
+        consumption: number
+        capacity: number
+        fleetStorage: number
+        spaceBonus: number
+        buildSpeedBonus: number
+        researchSpeedBonus: number
+      }>> = {
+        metalMine: (lvl) => ({
+          production: Math.floor(1500 * lvl * Math.pow(1.5, lvl) * resourceBonus),
+          consumption: Math.floor(10 * lvl * Math.pow(1.1, lvl))
+        }),
+        crystalMine: (lvl) => ({
+          production: Math.floor(1000 * lvl * Math.pow(1.5, lvl) * resourceBonus),
+          consumption: Math.floor(10 * lvl * Math.pow(1.1, lvl))
+        }),
+        deuteriumSynthesizer: (lvl) => ({
+          production: Math.floor(500 * lvl * Math.pow(1.5, lvl) * resourceBonus),
+          consumption: Math.floor(10 * lvl * Math.pow(1.1, lvl))
+        }),
+        solarPlant: (lvl) => ({
+          production: Math.floor(50 * lvl * Math.pow(1.1, lvl) * energyBonus)
+        }),
+        metalStorage: (lvl) => ({
+          capacity: Math.floor(baseCapacity * Math.pow(2, lvl) * storageBonus)
+        }),
+        crystalStorage: (lvl) => ({
+          capacity: Math.floor(baseCapacity * Math.pow(2, lvl) * storageBonus)
+        }),
+        deuteriumTank: (lvl) => ({
+          capacity: Math.floor(baseCapacity * Math.pow(2, lvl) * storageBonus)
+        }),
+        darkMatterCollector: (lvl) => ({
+          capacity: 1000 + lvl * 100,
+          production: Math.floor(25 * lvl * Math.pow(1.5, lvl))
+        }),
+        darkMatterTank: (lvl) => ({
+          capacity: Math.floor(1000 * Math.pow(2, lvl) * storageBonus)
+        }),
+        fusionReactor: (lvl) => ({
+          production: Math.floor(150 * lvl * Math.pow(1.15, lvl))
+        }),
+        shipyard: (lvl) => ({
+          fleetStorage: 1000 * lvl
+        }),
+        hangar: (lvl) => ({
+          fleetStorage: 500 * lvl
+        }),
+        terraformer: () => ({
+          spaceBonus: 30
+        }),
+        lunarBase: () => ({
+          spaceBonus: 30
+        }),
+        roboticsFactory: (lvl) => ({
+          buildSpeedBonus: lvl
+        }),
+        naniteFactory: (lvl) => ({
+          buildSpeedBonus: lvl * 2
+        }),
+        researchLab: (lvl) => ({
+          researchSpeedBonus: lvl
+        })
+      }
+
+      // Apply calculations if configuration exists
+      const calc = buildingCalculations[buildingType]
+      if (calc) {
+        const result = calc(level)
+        production = result.production ?? production
+        consumption = result.consumption ?? consumption
+        capacity = result.capacity ?? capacity
+        fleetStorage = result.fleetStorage ?? fleetStorage
+        spaceBonus = result.spaceBonus ?? spaceBonus
+        buildSpeedBonus = result.buildSpeedBonus ?? buildSpeedBonus
+        researchSpeedBonus = result.researchSpeedBonus ?? researchSpeedBonus
       }
 
       const points = pointsLogic.calculateBuildingPoints(buildingType, level - 1, level)

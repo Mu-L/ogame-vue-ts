@@ -22,9 +22,7 @@ export const validateTechnologyResearch = (
   const cost = researchLogic.calculateTechnologyCost(techType, targetLevel)
 
   // 检查队列中是否已存在该科技的研究任务
-  const existingQueueItem = researchQueue.find(
-    item => item.type === 'technology' && item.itemType === techType
-  )
+  const existingQueueItem = researchQueue.find(item => item.type === 'technology' && item.itemType === techType)
   if (existingQueueItem) {
     return { valid: false, reason: 'errors.technologyAlreadyInQueue' }
   }

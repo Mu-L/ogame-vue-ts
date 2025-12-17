@@ -31,11 +31,7 @@ export const calculateSystemDistance = (from: Position, to: Position): number =>
 /**
  * 检查目标是否在射程内
  */
-export const isTargetInRange = (
-  originPosition: Position,
-  targetPosition: Position,
-  impulseDriveLevel: number
-): boolean => {
+export const isTargetInRange = (originPosition: Position, targetPosition: Position, impulseDriveLevel: number): boolean => {
   const range = calculateMissileRange(impulseDriveLevel)
   const distance = calculateSystemDistance(originPosition, targetPosition)
   return distance <= range
@@ -156,11 +152,7 @@ export const calculateMissileImpact = (
     const defenseTypes = Object.keys(defenderPlanet.defense) as DefenseType[]
     const availableDefenses = defenseTypes.filter(type => {
       // 不能摧毁护盾罩和行星护盾
-      if (
-        type === DefenseTypes.SmallShieldDome ||
-        type === DefenseTypes.LargeShieldDome ||
-        type === DefenseTypes.PlanetaryShield
-      ) {
+      if (type === DefenseTypes.SmallShieldDome || type === DefenseTypes.LargeShieldDome || type === DefenseTypes.PlanetaryShield) {
         return false
       }
       return (defenderPlanet.defense[type] || 0) > 0
@@ -196,10 +188,7 @@ export const calculateMissileImpact = (
 /**
  * 应用导弹攻击结果到星球
  */
-export const applyMissileAttackResult = (
-  planet: Planet,
-  defenseLosses: Partial<Record<DefenseType, number>>
-): void => {
+export const applyMissileAttackResult = (planet: Planet, defenseLosses: Partial<Record<DefenseType, number>>): void => {
   for (const [defenseType, lossCount] of Object.entries(defenseLosses)) {
     const currentCount = planet.defense[defenseType as DefenseType] || 0
     planet.defense[defenseType as DefenseType] = Math.max(0, currentCount - lossCount)

@@ -8,6 +8,7 @@ export default {
     close: '닫기',
     back: '돌아가기',
     next: '다음',
+    gotIt: '',
     previous: '이전',
     submit: '제출',
     reset: '초기화',
@@ -125,6 +126,7 @@ export default {
     roboticsFactory: '로봇 공장',
     naniteFactory: '나노 공장',
     shipyard: '조선소',
+    hangar: '격납고',
     researchLab: '연구소',
     metalStorage: '금속 창고',
     crystalStorage: '크리스탈 창고',
@@ -165,6 +167,7 @@ export default {
     roboticsFactory: '건설 속도 향상',
     naniteFactory: '건설 대기열 수 증가, 레벨당 +1 (최대 10레벨)',
     shipyard: '함선 건조',
+    hangar: '함대 저장 용량 확장 전용 시설, 행성 전문화 지원',
     researchLab: '기술 연구',
     metalStorage: '금속 저장 용량 증가',
     crystalStorage: '크리스탈 저장 용량 증가',
@@ -199,10 +202,10 @@ export default {
     lightFighter: '기본 전투 유닛',
     heavyFighter: '중장갑 전투기',
     cruiser: '중형 전함, 공격과 방어 균형',
-    battleship: '강력한 전함',
+    battleship: '주력 중전함, 강력한 화력과 높은 방어력 보유',
     battlecruiser: '빠르고 강력한 전투함, 전함 공격에 탁월',
     bomber: '방어 시설 공격 전문 함선',
-    destroyer: '대형 함선 파괴 전문 헌터',
+    destroyer: '대형 함선 전문 격파함, 높은 화력이지만 방어력 낮음',
     smallCargo: '소량의 자원 운송',
     largeCargo: '대량의 자원 운송',
     colonyShip: '새로운 행성 식민에 사용',
@@ -312,10 +315,13 @@ export default {
     darkMatterSpecialist: '암흑 물질 수집 효율 향상'
   },
   queue: {
+    title: '건설 대기열',
+    empty: '활성 작업 없음',
     buildQueue: '건설 대기열',
     researchQueue: '연구 대기열',
     building: '건설 중',
     researching: '연구 중',
+    demolishing: '철거 중',
     remaining: '남은 시간',
     cancel: '취소',
     cancelBuild: '건설 취소',
@@ -581,10 +587,12 @@ export default {
     battles: '전투',
     spy: '정찰',
     npc: 'NPC',
+    diplomacy: '',
     battleReports: '전투 보고서',
     spyReports: '정찰 보고서',
     noBattleReports: '전투 보고서 없음',
     noSpyReports: '정찰 보고서 없음',
+    noDiplomaticReports: '',
     battleReport: '전투 보고서',
     spyReport: '정찰 보고서',
     victory: '승리',
@@ -640,7 +648,38 @@ export default {
       hostile: '상대방이 적대적이어서 선물을 받지 않습니다',
       neutral_distrust: '상대방이 당신을 신뢰하지 않습니다',
       polite_decline: '정중하게 거절했습니다'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: '',
+    spyDetected: '',
+    detectionResult: '',
+    detectionSuccess: '',
+    spiedNotificationMessage: '',
+    spiedNotificationTip: '',
+    viewInGalaxy: '',
+    // Mission report dialog
+    missionReportDetails: '',
+    missionSuccess: '',
+    missionFailed: '',
+    origin: '',
+    destination: '',
+    missionDetails: '',
+    transportedResources: '',
+    recycledResources: '',
+    remainingDebris: '',
+    newPlanet: '',
+    // NPC activity dialog
+    npcActivityDetails: '',
+    activityType: {
+      recycle: ''
+    },
+    activityLocation: '',
+    position: '',
+    nearPlanet: '',
+    activityDescription: '',
+    npcActivityMessage: '',
+    arrivalTime: '',
+    npcActivityTip: ''
   },
   missionReports: {
     transportSuccess: '수송 임무가 성공적으로 완료되었습니다',
@@ -832,6 +871,10 @@ export default {
     recentEvents: '최근 이벤트',
     recentEventsDescription: '최근 외교 활동 로그',
     ago: '전',
+    notifications: '',
+    markAllRead: '',
+    noReports: '',
+    viewAll: '',
     status: {
       friendly: '우호적',
       neutral: '중립',
@@ -847,10 +890,17 @@ export default {
       viewPlanets: '행성 보기'
     },
     lastEvent: '최근 이벤트',
+    reportDetails: '',
+    eventDescription: '',
+    reputationChange: '',
+    before: '',
+    after: '',
+    statusChange: '',
+    viewDiplomacy: '',
     events: {
       gift: '선물 전송',
       attack: '공격',
-    missileAttack: '미사일 공격',
+      missileAttack: '미사일 공격',
       allyAttacked: '동맹 공격당함',
       spy: '정찰',
       stealDebris: '잔해 약탈'
@@ -875,12 +925,20 @@ export default {
       receivedGiftFromNpc: '{npcName}로부터 선물을 받았습니다',
       acceptedGiftFromNpc: '{npcName}의 선물을 받았습니다: {metal}M {crystal}C {deuterium}D',
       playerRejectedGift: '플레이어가 선물을 거부했습니다',
-      rejectedGiftFromNpc: '{npcName}의 선물을 거부했습니다. 평판 {reputation}'
+      rejectedGiftFromNpc: '{npcName}의 선물을 거부했습니다. 평판 {reputation}',
+      destroyedNpcPlanet: '{npcName}의 {planetName}을(를) 파괴했습니다',
+      playerDestroyedPlanet: '플레이어가 {planetName}을(를) 파괴했습니다',
+      youDestroyedNpcPlanet: '당신은 {npcName}의 {planetName}을(를) 파괴했습니다. 평판 {reputation}',
+      playerDestroyedAllyPlanet: '플레이어가 동맹 {allyName}의 {planetName}을(를) 파괴했습니다',
+      allyOutraged: '{allyName}은(는) 당신이 동맹 {targetName}의 {planetName}을(를) 파괴한 것에 분노하고 있습니다',
+      npcEliminated: 'NPC {npcName}이(가) 완전히 제거되었습니다',
+      npcEliminatedMessage: '당신은 {npcName}의 모든 행성을 파괴했습니다! 이 세력은 완전히 소멸되었습니다.'
     }
   },
   pagination: {
     previous: '이전',
     next: '다음',
+    gotIt: '',
     first: '처음',
     last: '마지막',
     page: '{page}페이지'
@@ -889,5 +947,39 @@ export default {
     title: '페이지를 찾을 수 없습니다',
     description: '죄송합니다. 찾으시는 페이지가 존재하지 않습니다',
     goHome: '홈으로 이동'
+  },
+  time: {
+    days: '일',
+    hours: '시간',
+    minutes: '분',
+    seconds: '초'
+  },
+  tutorial: {
+    welcome: {
+      title: 'OGame에 오신 것을 환영합니다',
+      content: '환영합니다, 사령관! 기초부터 시작하여 우주 제국을 건설해 봅시다.'
+    },
+    buildSolarPlant: {
+      title: '태양광 발전소 건설',
+      content:
+        '먼저 태양광 발전소를 건설하세요! 행성에 에너지를 공급합니다. 에너지가 없으면 다른 자원 건물이 작동할 수 없습니다. 가장 중요한 첫 단계입니다.'
+    },
+    waitBuild: {
+      title: '건설 대기열',
+      content:
+        '건물이 건설 대기열에 추가되었습니다. 오른쪽 상단의 대기열 아이콘을 클릭하면 진행 중인 모든 건설 및 연구 작업을 확인할 수 있습니다. 건설에는 시간이 걸리지만 대기하는 동안 계속 작업할 수 있습니다.'
+    },
+    mobile: {
+      welcome: {
+        title: 'OGame에 오신 것을 환영합니다 (모바일)',
+        content:
+          '환영합니다, 사령관! 터치스크린용으로 설계된 간소화된 튜토리얼입니다. 제국 건설을 시작할 수 있도록 핵심 기능을 빠르게 소개하겠습니다.'
+      },
+      waitBuild: {
+        title: '건설 대기열',
+        content:
+          '오른쪽 상단의 대기열 아이콘을 클릭하여 건설 진행 상황을 확인하세요. 다른 페이지를 계속 탐색할 수 있으며, 건설은 백그라운드에서 진행됩니다.'
+      }
+    }
   }
 }

@@ -231,14 +231,14 @@
     return defenseType === DefenseType.SmallShieldDome || defenseType === DefenseType.LargeShieldDome
   }
 
-  const buildDefense = (defenseType: DefenseType, quantity: number): boolean => {
+  const buildDefense = (defenseType: DefenseType, quantity: number): { success: boolean; reason?: string } => {
     const currentPlanet = gameStore.currentPlanet
-    if (!currentPlanet) return false
+    if (!currentPlanet) return { success: false }
     const validation = shipValidation.validateDefenseBuild(currentPlanet, defenseType, quantity, gameStore.player.technologies)
-    if (!validation.valid) return false
+    if (!validation.valid) return { success: false, reason: validation.reason }
     const queueItem = shipValidation.executeDefenseBuild(currentPlanet, defenseType, quantity, gameStore.player.officers)
     currentPlanet.buildQueue.push(queueItem)
-    return true
+    return { success: true }
   }
 
   // 建造防御设施
@@ -251,10 +251,10 @@
       return
     }
 
-    const success = buildDefense(defenseType, quantity)
-    if (!success) {
+    const result = buildDefense(defenseType, quantity)
+    if (!result.success) {
       alertDialogTitle.value = t('defenseView.buildFailed')
-      alertDialogMessage.value = t('defenseView.buildFailedMessage')
+      alertDialogMessage.value = result.reason ? t(result.reason) : t('defenseView.buildFailedMessage')
       alertDialogOpen.value = true
     } else {
       quantities.value[defenseType] = 0

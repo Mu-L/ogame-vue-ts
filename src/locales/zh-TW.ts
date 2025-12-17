@@ -8,6 +8,7 @@ export default {
     close: '關閉',
     back: '返回',
     next: '下一步',
+    gotIt: '',
     previous: '上一步',
     submit: '提交',
     reset: '重置',
@@ -125,6 +126,7 @@ export default {
     roboticsFactory: '機器人工廠',
     naniteFactory: '納米工廠',
     shipyard: '船塢',
+    hangar: '機庫',
     researchLab: '研究實驗室',
     metalStorage: '金屬倉庫',
     crystalStorage: '晶體倉庫',
@@ -165,6 +167,7 @@ export default {
     roboticsFactory: '加快建造速度',
     naniteFactory: '增加建造佇列數量，每級+1佇列（最多10級）',
     shipyard: '建造艦船',
+    hangar: '專門用於擴展艦隊儲存容量，支援行星專業化發展',
     researchLab: '研究科技',
     metalStorage: '增加金屬儲存上限',
     crystalStorage: '增加晶體儲存上限',
@@ -199,10 +202,10 @@ export default {
     lightFighter: '基礎戰鬥單位',
     heavyFighter: '重裝戰鬥機',
     cruiser: '中型戰艦，攻守平衡',
-    battleship: '強力戰艦',
+    battleship: '主力重型戰艦，擁有強大的火力和防護',
     battlecruiser: '快速強大的戰鬥艦船，擅長攻擊戰列艦',
     bomber: '專門對付防禦設施的轟炸艦',
-    destroyer: '擅長摧毀大型艦船的獵殺者',
+    destroyer: '專業反大型艦船戰艦，高火力低防護',
     smallCargo: '運輸少量資源',
     largeCargo: '運輸大量資源',
     colonyShip: '用於殖民新星球',
@@ -314,10 +317,13 @@ export default {
     darkMatterSpecialist: '提升暗物質採集效率'
   },
   queue: {
+    title: '建造佇列',
+    empty: '當前沒有進行中的任務',
     buildQueue: '建造佇列',
     researchQueue: '研究佇列',
     building: '建造中',
     researching: '研究中',
+    demolishing: '拆除中',
     remaining: '剩餘時間',
     cancel: '取消',
     cancelBuild: '取消建造',
@@ -582,10 +588,12 @@ export default {
     battles: '戰鬥',
     spy: '偵查',
     npc: 'NPC',
+    diplomacy: '',
     battleReports: '戰鬥報告',
     spyReports: '間諜報告',
     noBattleReports: '暫無戰鬥報告',
     noSpyReports: '暫無間諜報告',
+    noDiplomaticReports: '',
     battleReport: '戰鬥報告',
     spyReport: '間諜報告',
     victory: '勝利',
@@ -641,7 +649,38 @@ export default {
       hostile: '對方對你有敵意，不接受禮物',
       neutral_distrust: '對方對你缺乏信任',
       polite_decline: '對方禮貌地拒絕了'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: '',
+    spyDetected: '',
+    detectionResult: '',
+    detectionSuccess: '',
+    spiedNotificationMessage: '',
+    spiedNotificationTip: '',
+    viewInGalaxy: '',
+    // Mission report dialog
+    missionReportDetails: '',
+    missionSuccess: '',
+    missionFailed: '',
+    origin: '',
+    destination: '',
+    missionDetails: '',
+    transportedResources: '',
+    recycledResources: '',
+    remainingDebris: '',
+    newPlanet: '',
+    // NPC activity dialog
+    npcActivityDetails: '',
+    activityType: {
+      recycle: ''
+    },
+    activityLocation: '',
+    position: '',
+    nearPlanet: '',
+    activityDescription: '',
+    npcActivityMessage: '',
+    arrivalTime: '',
+    npcActivityTip: ''
   },
   missionReports: {
     transportSuccess: '運輸任務成功完成',
@@ -833,6 +872,10 @@ export default {
     recentEvents: '最近事件',
     recentEventsDescription: '最近的外交活動記錄',
     ago: '前',
+    notifications: '',
+    markAllRead: '',
+    noReports: '',
+    viewAll: '',
     status: {
       friendly: '友好',
       neutral: '中立',
@@ -848,10 +891,17 @@ export default {
       viewPlanets: '查看星球'
     },
     lastEvent: '最近事件',
+    reportDetails: '外交報告詳情',
+    eventDescription: '事件描述',
+    reputationChange: '好感度變化',
+    before: '之前',
+    after: '之後',
+    statusChange: '關係狀態變化',
+    viewDiplomacy: '查看外交頁面',
     events: {
       gift: '已贈送禮物',
       attack: '攻擊',
-    missileAttack: '導彈攻擊',
+      missileAttack: '導彈攻擊',
       allyAttacked: '盟友被攻擊',
       spy: '間諜活動',
       stealDebris: '掠奪殘骸'
@@ -876,12 +926,20 @@ export default {
       receivedGiftFromNpc: '收到了{npcName}的禮物',
       acceptedGiftFromNpc: '你接受了{npcName}的禮物：{metal}金屬 {crystal}晶體 {deuterium}氘',
       playerRejectedGift: '玩家拒絕了禮物',
-      rejectedGiftFromNpc: '你拒絕了{npcName}的禮物。好感度{reputation}'
+      rejectedGiftFromNpc: '你拒絕了{npcName}的禮物。好感度{reputation}',
+      destroyedNpcPlanet: '摧毀了{npcName}的{planetName}',
+      playerDestroyedPlanet: '玩家摧毀了{planetName}',
+      youDestroyedNpcPlanet: '你摧毀了{npcName}的{planetName}。好感度{reputation}',
+      playerDestroyedAllyPlanet: '玩家摧毀了盟友{allyName}的{planetName}',
+      allyOutraged: '{allyName}對你摧毀盟友{targetName}的{planetName}感到憤怒',
+      npcEliminated: 'NPC {npcName}已被徹底消滅',
+      npcEliminatedMessage: '你消滅了{npcName}的所有星球！該勢力已被徹底摧毀。'
     }
   },
   pagination: {
     previous: '上一頁',
     next: '下一頁',
+    gotIt: '',
     first: '首頁',
     last: '末頁',
     page: '第 {page} 頁'
@@ -890,5 +948,36 @@ export default {
     title: '找不到頁面',
     description: '抱歉，您訪問的頁面不存在',
     goHome: '返回首頁'
+  },
+  time: {
+    days: '天',
+    hours: '小時',
+    minutes: '分鐘',
+    seconds: '秒'
+  },
+  tutorial: {
+    welcome: {
+      title: '歡迎來到 OGame',
+      content: '歡迎，指揮官！讓我們從基礎開始，建立您的宇宙帝國。'
+    },
+    buildSolarPlant: {
+      title: '建造太陽能電站',
+      content: '首先建造太陽能電站！它為您的星球提供能量。沒有能量，其他資源建築無法運作。這是最重要的第一步。'
+    },
+    waitBuild: {
+      title: '建造佇列',
+      content:
+        '您的建築現在在建造佇列中。點擊右上角的佇列圖示可以查看所有正在進行的建造和研究任務。建築需要時間完成，但您可以在等待時繼續操作。'
+    },
+    mobile: {
+      welcome: {
+        title: '歡迎來到 OGame（移動版）',
+        content: '歡迎，指揮官！這是專為觸控螢幕設計的簡化教程。我們將快速介紹核心功能，讓您開始建設帝國。'
+      },
+      waitBuild: {
+        title: '建造佇列',
+        content: '點擊右上角的佇列圖示可以查看建造進度。您可以繼續瀏覽其他頁面，建造會在背景進行。'
+      }
+    }
   }
 }

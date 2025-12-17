@@ -8,6 +8,7 @@ export default {
     close: 'Schließen',
     back: 'Zurück',
     next: 'Weiter',
+    gotIt: '',
     previous: 'Vorherige',
     submit: 'Absenden',
     reset: 'Zurücksetzen',
@@ -125,6 +126,7 @@ export default {
     roboticsFactory: 'Roboterfabrik',
     naniteFactory: 'Nanitenfabrik',
     shipyard: 'Raumschiffwerft',
+    hangar: 'Hangar',
     researchLab: 'Forschungslabor',
     metalStorage: 'Metallspeicher',
     crystalStorage: 'Kristallspeicher',
@@ -165,6 +167,7 @@ export default {
     roboticsFactory: 'Beschleunigt Baugeschwindigkeit',
     naniteFactory: 'Erhöht Bauauftragskapazität, +1 pro Stufe (max 10 Stufen)',
     shipyard: 'Baut Schiffe',
+    hangar: 'Spezialisierte Einrichtung zur Erweiterung der Flottenspeicherkapazität, unterstützt Planetenspezialisierung',
     researchLab: 'Erforscht Technologien',
     metalStorage: 'Erhöht Metallspeicherkapazität',
     crystalStorage: 'Erhöht Kristallspeicherkapazität',
@@ -199,10 +202,10 @@ export default {
     lightFighter: 'Grundlegende Kampfeinheit',
     heavyFighter: 'Schwer gepanzerter Jäger',
     cruiser: 'Mittleres Kriegsschiff, ausgewogene Offensive und Defensive',
-    battleship: 'Mächtiges Kriegsschiff',
+    battleship: 'Schweres Hauptkriegsschiff mit starker Feuerkraft und hoher Verteidigung',
     battlecruiser: 'Schnelles mächtiges Kriegsschiff, hervorragend gegen Schlachtschiffe',
     bomber: 'Spezialisiertes Schiff zum Angriff auf Verteidigungsanlagen',
-    destroyer: 'Jäger spezialisiert auf Zerstörung großer Schiffe',
+    destroyer: 'Spezialisiertes Anti-Großschiff mit hoher Feuerkraft aber geringer Verteidigung',
     smallCargo: 'Transportiert kleine Mengen Ressourcen',
     largeCargo: 'Transportiert große Mengen Ressourcen',
     colonyShip: 'Zur Kolonisierung neuer Planeten',
@@ -312,10 +315,13 @@ export default {
     darkMatterSpecialist: 'Verbessert Dunkle-Materie-Sammlungseffizienz'
   },
   queue: {
+    title: 'Bauauftrag',
+    empty: 'Keine aktiven Aufgaben',
     buildQueue: 'Bauauftrag',
     researchQueue: 'Forschungsauftrag',
     building: 'Im Bau',
     researching: 'In Forschung',
+    demolishing: 'Wird abgerissen',
     remaining: 'Verbleibend',
     cancel: 'Abbrechen',
     cancelBuild: 'Bau abbrechen',
@@ -587,11 +593,13 @@ export default {
     battles: 'Kämpfe',
     spy: 'Spionage',
     npc: 'NPC',
+    diplomacy: '',
     spied: 'Ausspioniert',
     battleReports: 'Kampfberichte',
     spyReports: 'Spionageberichte',
     noBattleReports: 'Keine Kampfberichte',
     noSpyReports: 'Keine Spionageberichte',
+    noDiplomaticReports: '',
     noSpiedNotifications: 'Keine Ausspionierungs-Benachrichtigungen',
     battleReport: 'Kampfbericht',
     spyReport: 'Spionagebericht',
@@ -646,7 +654,38 @@ export default {
       hostile: 'Sie sind feindlich und nehmen keine Geschenke an',
       neutral_distrust: 'Sie vertrauen Ihnen nicht',
       polite_decline: 'Sie lehnten höflich ab'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: '',
+    spyDetected: '',
+    detectionResult: '',
+    detectionSuccess: '',
+    spiedNotificationMessage: '',
+    spiedNotificationTip: '',
+    viewInGalaxy: '',
+    // Mission report dialog
+    missionReportDetails: '',
+    missionSuccess: '',
+    missionFailed: '',
+    origin: '',
+    destination: '',
+    missionDetails: '',
+    transportedResources: '',
+    recycledResources: '',
+    remainingDebris: '',
+    newPlanet: '',
+    // NPC activity dialog
+    npcActivityDetails: '',
+    activityType: {
+      recycle: ''
+    },
+    activityLocation: '',
+    position: '',
+    nearPlanet: '',
+    activityDescription: '',
+    npcActivityMessage: '',
+    arrivalTime: '',
+    npcActivityTip: ''
   },
   missionReports: {
     transportSuccess: 'Transportmission erfolgreich abgeschlossen',
@@ -802,7 +841,8 @@ export default {
     npcWillSpyAndAttack: '{npcName} wird in 5s spionieren und in 10s angreifen',
     acceleratedMissions: '{count} Missionen auf 5 Sekunden beschleunigt',
     npcFleetInitialized: '{npcName} Flotte initialisiert',
-    npcFleetDetails: '100 Spionagesonden\n500 Leichte Jäger\n300 Schwere Jäger\n200 Kreuzer\n100 Schlachtschiffe\n50 Bomber\n30 Zerstörer\n20 Schlachtkreuzer',
+    npcFleetDetails:
+      '100 Spionagesonden\n500 Leichte Jäger\n300 Schwere Jäger\n200 Kreuzer\n100 Schlachtschiffe\n50 Bomber\n30 Zerstörer\n20 Schlachtkreuzer',
     dangerZone: 'Gefahrenzone',
     dangerZoneDesc: 'Die folgenden Vorgänge sind irreversibel',
     resetGame: 'Spiel zurücksetzen',
@@ -840,6 +880,10 @@ export default {
     recentEvents: 'Aktuelle Ereignisse',
     recentEventsDescription: 'Protokoll der jüngsten diplomatischen Aktivitäten',
     ago: 'vor',
+    notifications: '',
+    markAllRead: '',
+    noReports: '',
+    viewAll: '',
     status: {
       friendly: 'Freundlich',
       neutral: 'Neutral',
@@ -855,10 +899,17 @@ export default {
       viewPlanets: 'Planeten ansehen'
     },
     lastEvent: 'Letztes Ereignis',
+    reportDetails: '',
+    eventDescription: '',
+    reputationChange: '',
+    before: '',
+    after: '',
+    statusChange: '',
+    viewDiplomacy: '',
     events: {
       gift: 'Geschenk gesendet',
       attack: 'Angriff',
-    missileAttack: 'Raketenangriff',
+      missileAttack: 'Raketenangriff',
       allyAttacked: 'Verbündeter angegriffen',
       spy: 'Spionage',
       stealDebris: 'Trümmer gestohlen'
@@ -883,12 +934,20 @@ export default {
       receivedGiftFromNpc: 'Geschenk von {npcName} erhalten',
       acceptedGiftFromNpc: 'Sie haben ein Geschenk von {npcName} angenommen: {metal}M {crystal}K {deuterium}D',
       playerRejectedGift: 'Spieler hat Geschenk abgelehnt',
-      rejectedGiftFromNpc: 'Sie haben ein Geschenk von {npcName} abgelehnt. Ansehen {reputation}'
+      rejectedGiftFromNpc: 'Sie haben ein Geschenk von {npcName} abgelehnt. Ansehen {reputation}',
+      destroyedNpcPlanet: '{npcName}s {planetName} zerstört',
+      playerDestroyedPlanet: 'Spieler hat {planetName} zerstört',
+      youDestroyedNpcPlanet: 'Sie haben {npcName}s {planetName} zerstört. Ansehen {reputation}',
+      playerDestroyedAllyPlanet: 'Spieler hat Verbündeten {allyName}s {planetName} zerstört',
+      allyOutraged: '{allyName} ist empört, dass Sie den Planeten {planetName} ihres Verbündeten {targetName} zerstört haben',
+      npcEliminated: 'NPC {npcName} wurde vollständig eliminiert',
+      npcEliminatedMessage: 'Sie haben alle Planeten von {npcName} zerstört! Diese Fraktion wurde vollständig ausgelöscht.'
     }
   },
   pagination: {
     previous: 'Vorherige',
     next: 'Nächste',
+    gotIt: '',
     first: 'Erste',
     last: 'Letzte',
     page: 'Seite {page}'
@@ -897,5 +956,39 @@ export default {
     title: 'Seite nicht gefunden',
     description: 'Entschuldigung, die gesuchte Seite existiert nicht',
     goHome: 'Zur Startseite'
+  },
+  time: {
+    days: 'Tage',
+    hours: 'Stunden',
+    minutes: 'Minuten',
+    seconds: 'Sekunden'
+  },
+  tutorial: {
+    welcome: {
+      title: 'Willkommen bei OGame',
+      content: 'Willkommen, Kommandant! Beginnen wir mit den Grundlagen und bauen Sie Ihr Weltraum-Imperium auf.'
+    },
+    buildSolarPlant: {
+      title: 'Solarkraftwerk bauen',
+      content:
+        'Bauen Sie zuerst ein Solarkraftwerk! Es liefert Energie für Ihren Planeten. Ohne Energie können andere Ressourcengebäude nicht funktionieren. Dies ist der wichtigste erste Schritt.'
+    },
+    waitBuild: {
+      title: 'Bauauftrag',
+      content:
+        'Ihr Gebäude befindet sich jetzt in der Bauauftragsliste. Klicken Sie auf das Warteschlangensymbol oben rechts, um alle laufenden Bau- und Forschungsaufträge anzuzeigen. Gebäude brauchen Zeit zum Fertigstellen, aber Sie können während des Wartens weitermachen.'
+    },
+    mobile: {
+      welcome: {
+        title: 'Willkommen bei OGame (Mobil)',
+        content:
+          'Willkommen, Kommandant! Dies ist ein optimiertes Tutorial für Touchscreens. Wir werden schnell die Kernfunktionen durchgehen, damit Sie mit dem Aufbau Ihres Imperiums beginnen können.'
+      },
+      waitBuild: {
+        title: 'Bauauftrag',
+        content:
+          'Klicken Sie auf das Warteschlangensymbol oben rechts, um den Baufortschritt anzuzeigen. Sie können weiter andere Seiten durchsuchen - der Bau läuft im Hintergrund.'
+      }
+    }
   }
 }

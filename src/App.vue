@@ -1,5 +1,5 @@
 <template>
-  <SidebarProvider :open="sidebarOpen" @update:open="sidebarOpen = $event">
+  <SidebarProvider :open="sidebarOpen" @update:open="handleSidebarOpenChange">
     <Sidebar collapsible="icon">
       <!-- Logo -->
       <SidebarHeader class="border-b">
@@ -17,6 +17,7 @@
             <Popover>
               <PopoverTrigger as-child>
                 <Button
+                  data-tutorial="planet-selector"
                   variant="outline"
                   class="w-full justify-between h-auto px-3 py-2.5 border-2 hover:bg-accent hover:border-primary transition-colors"
                 >
@@ -94,28 +95,35 @@
         </SidebarGroup>
 
         <!-- 导航菜单 -->
-        <SidebarGroup>
+        <SidebarGroup data-tutorial="navigation">
           <SidebarMenu>
             <SidebarMenuItem v-for="item in navItems" :key="item.path">
-              <SidebarMenuButton as-child :is-active="$route.path === item.path" :tooltip="item.name.value">
-                <RouterLink :to="item.path">
-                  <component :is="item.icon" />
-                  <span>{{ item.name.value }}</span>
-                  <!-- 未读消息数量 -->
-                  <SidebarMenuBadge
-                    v-if="item.path === '/messages' && unreadMessagesCount > 0"
-                    class="bg-destructive text-destructive-foreground"
-                  >
-                    {{ unreadMessagesCount }}
-                  </SidebarMenuBadge>
-                  <!-- 正在执行的舰队任务数量 -->
-                  <SidebarMenuBadge
-                    v-if="item.path === '/fleet' && activeFleetMissionsCount > 0"
-                    class="bg-primary text-primary-foreground"
-                  >
-                    {{ activeFleetMissionsCount }}
-                  </SidebarMenuBadge>
-                </RouterLink>
+              <SidebarMenuButton
+                :data-nav-path="item.path"
+                :is-active="$route.path === item.path"
+                :tooltip="item.name.value"
+                @click="handleNavClick(item.path, $event)"
+              >
+                <component :is="item.icon" />
+                <span>{{ item.name.value }}</span>
+                <!-- 未读消息数量 -->
+                <SidebarMenuBadge
+                  v-if="item.path === '/messages' && unreadMessagesCount > 0"
+                  class="bg-destructive text-destructive-foreground"
+                >
+                  {{ unreadMessagesCount }}
+                </SidebarMenuBadge>
+                <!-- 正在执行的舰队任务数量 -->
+                <SidebarMenuBadge v-if="item.path === '/fleet' && activeFleetMissionsCount > 0" class="bg-primary text-primary-foreground">
+                  {{ activeFleetMissionsCount }}
+                </SidebarMenuBadge>
+                <!-- 未读外交报告数量 -->
+                <SidebarMenuBadge
+                  v-if="item.path === '/diplomacy' && unreadDiplomaticReportsCount > 0"
+                  class="bg-destructive text-destructive-foreground"
+                >
+                  {{ unreadDiplomaticReportsCount }}
+                </SidebarMenuBadge>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -189,11 +197,14 @@
             <div class="grid items-center gap-3 sm:gap-6" style="grid-template-columns: auto 1fr auto">
               <!-- 左侧：汉堡菜单（移动端）/ 占位（PC端） -->
               <div>
-                <SidebarTrigger class="lg:hidden" />
+                <SidebarTrigger class="lg:hidden" data-tutorial="mobile-menu" />
               </div>
 
               <!-- 资源显示 - PC端居中，移动端可折叠 -->
-              <div :class="['flex items-center gap-3 sm:gap-6 justify-center', resourceBarExpanded ? 'hidden' : 'overflow-x-auto']">
+              <div
+                class="resource-bar flex items-center gap-3 sm:gap-6 justify-center"
+                :class="resourceBarExpanded ? 'hidden' : 'overflow-x-auto'"
+              >
                 <div v-for="resourceType in resourceTypes" :key="resourceType.key" class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                   <ResourceIcon :type="resourceType.key" size="md" />
                   <div class="min-w-0">
@@ -233,15 +244,11 @@
                   <ChevronUp v-else class="h-4 w-4" />
                 </Button>
 
-                <!-- 建造队列状态 -->
-                <div v-if="planet.buildQueue.length > 0" class="flex items-center gap-1.5 text-xs sm:text-sm">
-                  <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span class="text-muted-foreground hidden sm:inline">{{ t('queue.building') }}</span>
-                </div>
-                <div v-if="gameStore.player.researchQueue.length > 0" class="flex items-center gap-1.5 text-xs sm:text-sm">
-                  <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                  <span class="text-muted-foreground hidden sm:inline">{{ t('queue.researching') }}</span>
-                </div>
+                <!-- 外交通知 -->
+                <DiplomaticNotifications />
+
+                <!-- 队列通知 -->
+                <QueueNotifications />
               </div>
             </div>
           </div>
@@ -310,70 +317,6 @@
           @mark-as-read="removeIncomingFleetAlert"
         />
 
-        <!-- 建造队列 -->
-        <div
-          v-if="planet && (planet.buildQueue.length > 0 || gameStore.player.researchQueue.length > 0)"
-          class="bg-card border-b px-4 sm:px-6 py-4.5"
-        >
-          <div class="space-y-3">
-            <!-- 建造队列 -->
-            <div v-for="item in planet.buildQueue" :key="item.id" class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs sm:text-sm gap-2">
-                <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                  <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-                  <span class="font-medium truncate">{{ getItemName(item) }}</span>
-                  <span class="text-muted-foreground hidden sm:inline flex-shrink-0 text-[10px] sm:text-xs">
-                    <template v-if="item.type === 'ship' || item.type === 'defense'">
-                      → {{ t('queue.quantity') }} {{ item.quantity }}
-                    </template>
-                    <template v-else>→ {{ t('queue.level') }} {{ item.targetLevel }}</template>
-                  </span>
-                </div>
-                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                  <span class="text-muted-foreground text-[10px] sm:text-xs whitespace-nowrap">
-                    {{ formatTime(getRemainingTime(item)) }}
-                  </span>
-                  <Button
-                    @click="handleCancelBuild(item.id)"
-                    variant="ghost"
-                    size="sm"
-                    class="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs"
-                  >
-                    {{ t('queue.cancel') }}
-                  </Button>
-                </div>
-              </div>
-              <Progress :model-value="getQueueProgress(item)" class="h-1.5" />
-            </div>
-            <!-- 研究队列 -->
-            <div v-for="item in gameStore.player.researchQueue" :key="item.id" class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs sm:text-sm gap-2">
-                <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                  <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
-                  <span class="font-medium truncate">{{ getItemName(item) }}</span>
-                  <span class="text-muted-foreground hidden sm:inline flex-shrink-0 text-[10px] sm:text-xs">
-                    → {{ t('queue.level') }} {{ item.targetLevel }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                  <span class="text-muted-foreground text-[10px] sm:text-xs whitespace-nowrap">
-                    {{ formatTime(getRemainingTime(item)) }}
-                  </span>
-                  <Button
-                    @click="handleCancelResearch(item.id)"
-                    variant="ghost"
-                    size="sm"
-                    class="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs"
-                  >
-                    {{ t('queue.cancel') }}
-                  </Button>
-                </div>
-              </div>
-              <Progress :model-value="getQueueProgress(item)" class="h-1.5" />
-            </div>
-          </div>
-        </div>
-
         <!-- 内容区域 -->
         <main class="flex-1 overflow-y-auto">
           <div class="animate-fade-in">
@@ -405,6 +348,9 @@
     <!-- 更新弹窗 -->
     <UpdateDialog v-model:open="showUpdateDialog" :version-info="updateInfo" />
 
+    <!-- 新手引导 -->
+    <TutorialOverlay />
+
     <!-- Toast 通知 -->
     <Sonner position="top-center" />
   </SidebarProvider>
@@ -412,18 +358,21 @@
 
 <script setup lang="ts">
   import { onMounted, onUnmounted, computed, ref, watch } from 'vue'
-  import { RouterView, RouterLink } from 'vue-router'
+  import { RouterView, useRouter } from 'vue-router'
   import { useGameStore } from '@/stores/gameStore'
   import { useUniverseStore } from '@/stores/universeStore'
   import { useNPCStore } from '@/stores/npcStore'
   import { useTheme } from '@/composables/useTheme'
   import { useI18n } from '@/composables/useI18n'
+  import { useGameConfig } from '@/composables/useGameConfig'
+  import { useTutorial } from '@/composables/useTutorial'
   import { localeNames, detectBrowserLocale, type Locale } from '@/locales'
   import { Button } from '@/components/ui/button'
   import { Badge } from '@/components/ui/badge'
-  import { Progress } from '@/components/ui/progress'
   import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
   import IncomingFleetAlerts from '@/components/IncomingFleetAlerts.vue'
+  import DiplomaticNotifications from '@/components/DiplomaticNotifications.vue'
+  import QueueNotifications from '@/components/QueueNotifications.vue'
   import {
     Sidebar,
     SidebarContent,
@@ -451,11 +400,13 @@
   } from '@/components/ui/alert-dialog'
   import DetailDialog from '@/components/DetailDialog.vue'
   import UpdateDialog from '@/components/UpdateDialog.vue'
+  import TutorialOverlay from '@/components/TutorialOverlay.vue'
   import Sonner from '@/components/ui/sonner/Sonner.vue'
-  import { MissionType } from '@/types/game'
-  import type { BuildQueueItem, FleetMission, NPC, IncomingFleetAlert, MissileAttack } from '@/types/game'
+  import { MissionType, BuildingType, DiplomaticEventType } from '@/types/game'
+  import type { FleetMission, NPC, IncomingFleetAlert, MissileAttack } from '@/types/game'
+  import { DIPLOMATIC_CONFIG } from '@/config/gameConfig'
   import type { VersionInfo } from '@/utils/versionCheck'
-  import { formatNumber, formatTime, getResourceColor } from '@/utils/format'
+  import { formatNumber, getResourceColor } from '@/utils/format'
   import {
     Moon,
     Sun,
@@ -497,11 +448,14 @@
   // 执行数据迁移（在 store 初始化之前）
   migrateGameData()
 
+  const router = useRouter()
   const gameStore = useGameStore()
   const universeStore = useUniverseStore()
   const npcStore = useNPCStore()
   const { isDark } = useTheme()
   const { t } = useI18n()
+  const { BUILDINGS } = useGameConfig()
+  const { startTutorial, tutorialState, currentStep } = useTutorial()
 
   // ConfirmDialog 状态
   const confirmDialogOpen = ref(false)
@@ -536,10 +490,10 @@
     if (!shouldInit) {
       const now = Date.now()
 
-      // 计算离线收益（直接同步计算）
+      // 计算离线收益（直接同步计算，应用游戏速度）
       const bonuses = officerLogic.calculateActiveBonuses(gameStore.player.officers, now)
       gameStore.player.planets.forEach(planet => {
-        resourceLogic.updatePlanetResources(planet, now, bonuses)
+        resourceLogic.updatePlanetResources(planet, now, bonuses, gameStore.gameSpeed)
       })
 
       // 只在没有NPC星球时才生成（首次加载已有玩家数据时）
@@ -568,13 +522,13 @@
   }
 
   const updateGame = async () => {
-    if (gameStore.isPaused) return
     const now = Date.now()
     gameStore.gameTime = now
+    if (gameStore.isPaused) return
     // 检查军官过期
     gameLogic.checkOfficersExpiration(gameStore.player.officers, now)
     // 处理游戏更新（建造队列、研究队列等）
-    const result = gameLogic.processGameUpdate(gameStore.player, now)
+    const result = gameLogic.processGameUpdate(gameStore.player, now, gameStore.gameSpeed)
     gameStore.player.researchQueue = result.updatedResearchQueue
     // 处理舰队任务
     gameStore.player.fleetMissions.forEach(mission => {
@@ -613,6 +567,27 @@
 
     // NPC行为系统更新（侦查和攻击决策）
     updateNPCBehavior(1)
+
+    // 检查并处理被消灭的NPC（所有星球都被摧毁的NPC）
+    const eliminatedNpcIds = diplomaticLogic.checkAndHandleEliminatedNPCs(npcStore.npcs, gameStore.player, gameStore.locale)
+    if (eliminatedNpcIds.length > 0) {
+      // 从universeStore中移除被消灭NPC的星球数据
+      eliminatedNpcIds.forEach(npcId => {
+        const npc = npcStore.npcs.find(n => n.id === npcId)
+        if (npc && npc.planets) {
+          // 遍历NPC的所有星球，从universeStore中删除
+          npc.planets.forEach(planet => {
+            const planetKey = gameLogic.generatePositionKey(planet.position.galaxy, planet.position.system, planet.position.position)
+            if (universeStore.planets[planetKey]) {
+              delete universeStore.planets[planetKey]
+            }
+          })
+        }
+      })
+
+      // 从NPC列表中移除被消灭的NPC
+      npcStore.npcs = npcStore.npcs.filter(npc => !eliminatedNpcIds.includes(npc.id))
+    }
   }
 
   const processMissionArrival = async (mission: FleetMission) => {
@@ -812,6 +787,15 @@
 
       if (destroyResult && destroyResult.success && destroyResult.planetId) {
         // 星球被摧毁
+
+        // 处理外交关系（如果目标是NPC星球）
+        if (targetPlanet && targetPlanet.ownerId) {
+          const planetOwner = npcStore.npcs.find(npc => npc.id === targetPlanet.ownerId)
+          if (planetOwner) {
+            diplomaticLogic.handlePlanetDestructionReputation(gameStore.player, targetPlanet, planetOwner, npcStore.npcs, gameStore.locale)
+          }
+        }
+
         // 从玩家星球列表中移除（如果是玩家的星球）
         const planetIndex = gameStore.player.planets.findIndex(p => p.id === destroyResult.planetId)
         if (planetIndex > -1) {
@@ -1010,6 +994,44 @@
     // 应用损失到目标星球
     missileLogic.applyMissileAttackResult(targetPlanet, impactResult.defenseLosses)
 
+    // 如果目标是NPC的星球，扣除外交好感度
+    if (targetPlanet.ownerId && targetPlanet.ownerId !== gameStore.player.id) {
+      const targetNpc = npcStore.npcs.find(npc => npc.id === targetPlanet.ownerId)
+      if (targetNpc) {
+        // 导弹攻击扣除好感度
+        const { REPUTATION_CHANGES } = DIPLOMATIC_CONFIG
+        const reputationLoss = REPUTATION_CHANGES.ATTACK / 2 // 导弹攻击的好感度惩罚是普通攻击的一半
+
+        // 更新玩家对NPC的关系
+        if (!gameStore.player.diplomaticRelations) {
+          gameStore.player.diplomaticRelations = {}
+        }
+        const relation = diplomaticLogic.getOrCreateRelation(
+          gameStore.player.diplomaticRelations,
+          gameStore.player.id,
+          targetNpc.id
+        )
+        gameStore.player.diplomaticRelations[targetNpc.id] = diplomaticLogic.updateReputation(
+          relation,
+          reputationLoss,
+          DiplomaticEventType.Attack,
+          t('diplomacy.reports.missileAttackNpc', { npcName: targetNpc.name })
+        )
+
+        // 更新NPC对玩家的关系
+        if (!targetNpc.relations) {
+          targetNpc.relations = {}
+        }
+        const npcRelation = diplomaticLogic.getOrCreateRelation(targetNpc.relations, targetNpc.id, gameStore.player.id)
+        targetNpc.relations[gameStore.player.id] = diplomaticLogic.updateReputation(
+          npcRelation,
+          reputationLoss,
+          DiplomaticEventType.Attack,
+          t('diplomacy.reports.wasAttackedByMissile')
+        )
+      }
+    }
+
     // 标记导弹攻击为已到达
     missileAttack.status = 'arrived'
 
@@ -1062,7 +1084,7 @@
 
   // NPC成长系统更新函数
   let npcUpdateCounter = 0 // 累计秒数
-  const NPC_UPDATE_INTERVAL = 10 // 每10秒更新一次NPC，减少性能开销
+  const NPC_UPDATE_INTERVAL = 1 // 每1秒更新一次NPC，确保发育速度与玩家相当
 
   const updateNPCGrowth = (deltaSeconds: number) => {
     // 累积时间
@@ -1216,6 +1238,14 @@
     startGameLoop()
     // 启动科乐美秘籍监听
     konamiCleanup = setupKonamiCode()
+
+    // 启动新手引导（如果尚未完成）
+    startTutorial()
+
+    // 添加队列取消事件监听
+    window.addEventListener('cancel-build', handleCancelBuildEvent as EventListener)
+    window.addEventListener('cancel-research', handleCancelResearchEvent as EventListener)
+
     // 首次检查版本（被动检测）
     const versionInfo = await checkLatestVersion(gameStore.player.lastVersionCheckTime || 0, (time: number) => {
       gameStore.player.lastVersionCheckTime = time
@@ -1259,7 +1289,20 @@
     if (gameLoop) clearInterval(gameLoop)
     if (konamiCleanup) konamiCleanup()
     if (versionCheckInterval) clearInterval(versionCheckInterval)
+    // 移除队列取消事件监听
+    window.removeEventListener('cancel-build', handleCancelBuildEvent as EventListener)
+    window.removeEventListener('cancel-research', handleCancelResearchEvent as EventListener)
   })
+
+  // 处理取消建造事件
+  const handleCancelBuildEvent = (event: CustomEvent) => {
+    handleCancelBuild(event.detail)
+  }
+
+  // 处理取消研究事件
+  const handleCancelResearchEvent = (event: CustomEvent) => {
+    handleCancelResearch(event.detail)
+  }
 
   // 科乐美秘籍：上上下下左左右右BA
   const setupKonamiCode = () => {
@@ -1312,6 +1355,56 @@
     ...(gameStore.player.isGMEnabled ? [{ name: computed(() => t('nav.gm')), path: '/gm', icon: Wrench }] : [])
   ])
 
+  // 功能解锁要求配置
+  const featureRequirements: Record<string, { building: BuildingType; level: number }> = {
+    '/research': { building: BuildingType.ResearchLab, level: 1 },
+    '/shipyard': { building: BuildingType.Shipyard, level: 1 },
+    '/defense': { building: BuildingType.Shipyard, level: 1 },
+    '/fleet': { building: BuildingType.Shipyard, level: 1 }
+  }
+
+  // 检查功能是否解锁
+  const checkFeatureUnlocked = (path: string): { unlocked: boolean; requirement?: { building: BuildingType; level: number } } => {
+    const requirement = featureRequirements[path]
+    if (!requirement) {
+      return { unlocked: true }
+    }
+
+    const currentLevel = planet.value?.buildings[requirement.building] || 0
+    return {
+      unlocked: currentLevel >= requirement.level,
+      requirement
+    }
+  }
+
+  // 处理导航点击
+  const handleNavClick = (path: string, event: Event) => {
+    const { unlocked, requirement } = checkFeatureUnlocked(path)
+
+    if (!unlocked && requirement) {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const buildingName = BUILDINGS.value[requirement.building]?.name || requirement.building
+      const currentLevel = planet.value?.buildings[requirement.building] || 0
+
+      toast.warning(t('common.featureLocked'), {
+        description: `${t('common.requiredBuilding')}: ${buildingName} Lv ${requirement.level} (${t(
+          'common.currentLevel'
+        )}: Lv ${currentLevel})`,
+        action: {
+          label: t('common.goToBuildings'),
+          onClick: () => router.push('/buildings')
+        },
+        duration: 3000
+      })
+      return
+    }
+
+    // 功能已解锁，正常导航
+    router.push(path)
+  }
+
   // 使用直接计算，不再缓存
   const production = computed(() => {
     if (!planet.value) return null
@@ -1362,6 +1455,11 @@
     return fleetMissions + flyingMissiles
   })
 
+  // 未读外交报告数量
+  const unreadDiplomaticReportsCount = computed(() => {
+    return (gameStore.player.diplomaticReports || []).filter(r => !r.read).length
+  })
+
   // 资源类型配置
   const resourceTypes = [
     { key: 'metal' as const },
@@ -1402,33 +1500,22 @@
     sidebarOpen.value = !sidebarOpen.value
   }
 
-  // 获取队列项的名称
-  const getItemName = (item: BuildQueueItem): string => {
-    if (item.type === 'building' || item.type === 'demolish') {
-      const buildingName = t(`buildings.${item.itemType}`)
-      return item.type === 'demolish' ? `${t('buildingsView.demolish')} - ${buildingName}` : buildingName
-    } else if (item.type === 'technology') {
-      return t(`technologies.${item.itemType}`)
-    } else if (item.type === 'ship') {
-      return t(`ships.${item.itemType}`)
-    } else if (item.type === 'defense') {
-      return t(`defenses.${item.itemType}`)
+  // 处理侧边栏打开/关闭状态变化
+  const handleSidebarOpenChange = (open: boolean) => {
+    // 如果是移动端且在教程的菜单相关步骤,阻止关闭侧边栏
+    if (window.innerWidth < 768 && tutorialState.value.isActive && currentStep.value) {
+      // 只在第3步期间阻止关闭侧边栏，让玩家必须手动打开
+      if (currentStep.value.id === 'menu_intro_mobile') {
+        // 只允许打开,不允许关闭
+        if (open) {
+          sidebarOpen.value = true
+        }
+        // 如果试图关闭,忽略该操作,保持打开状态
+        return
+      }
     }
-    return item.itemType
-  }
-
-  // 获取剩余时间
-  const getRemainingTime = (item: BuildQueueItem): number => {
-    const now = Date.now()
-    return Math.max(0, Math.floor((item.endTime - now) / 1000))
-  }
-
-  // 获取队列进度
-  const getQueueProgress = (item: BuildQueueItem): number => {
-    const now = Date.now()
-    const total = item.endTime - item.startTime
-    const elapsed = now - item.startTime
-    return Math.min(100, Math.max(0, (elapsed / total) * 100))
+    // 其他情况正常更新
+    sidebarOpen.value = open
   }
 
   // 取消建造

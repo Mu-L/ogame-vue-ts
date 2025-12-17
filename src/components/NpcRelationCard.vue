@@ -53,7 +53,13 @@
       <div v-if="npc.allies && npc.allies.length > 0" class="pt-2 border-t">
         <p class="text-sm text-muted-foreground mb-2">{{ t('diplomacy.alliedWith') }}:</p>
         <div class="flex flex-wrap gap-1">
-          <Badge v-for="allyId in npc.allies.slice(0, 3)" :key="allyId" variant="outline" class="text-xs">
+          <Badge
+            v-for="allyId in npc.allies.slice(0, 3)"
+            :key="allyId"
+            variant="outline"
+            class="text-xs cursor-pointer hover:bg-accent transition-colors"
+            @click="scrollToAlly(allyId)"
+          >
             {{ getAllyName(allyId) }}
           </Badge>
           <Badge v-if="npc.allies.length > 3" variant="outline" class="text-xs">
@@ -80,7 +86,9 @@
         <div class="flex items-center gap-2 text-xs">
           <component :is="getEventIcon(recentEvent.reason)" class="h-3 w-3" />
           <span>{{ getEventText(recentEvent.reason) }}</span>
-          <span class="text-muted-foreground">{{ formatTime(Date.now() - recentEvent.timestamp) }} {{ t('diplomacy.ago') }}</span>
+          <span class="text-muted-foreground">
+            {{ formatRelativeTime((Date.now() - recentEvent.timestamp) / 1000, t) }}{{ t('diplomacy.ago') }}
+          </span>
         </div>
       </div>
     </CardContent>
@@ -98,7 +106,7 @@
   import { Gift, Globe, Sword, Eye, Trash2 } from 'lucide-vue-next'
   import { RelationStatus, DiplomaticEventType } from '@/types/game'
   import type { DiplomaticRelation, NPC } from '@/types/game'
-  import { formatTime } from '@/utils/format'
+  import { formatRelativeTime } from '@/utils/format'
 
   const props = defineProps<{
     npc: NPC
@@ -228,5 +236,13 @@
         }
       })
     }
+  }
+
+  // 滚动到盟友卡片
+  const scrollToAlly = (allyId: string) => {
+    // 触发父组件的滚动事件
+    // 通过emit通知父组件滚动到指定的NPC卡片
+    const event = new CustomEvent('scrollToNpc', { detail: { npcId: allyId }, bubbles: true })
+    document.dispatchEvent(event)
   }
 </script>

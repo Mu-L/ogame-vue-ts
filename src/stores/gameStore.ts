@@ -1,5 +1,17 @@
 import { defineStore } from 'pinia'
-import type { Planet, Player, BuildQueueItem, FleetMission, BattleResult, SpyReport, Officer, SpiedNotification, NPCActivityNotification, IncomingFleetAlert, MissileAttack } from '@/types/game'
+import type {
+  Planet,
+  Player,
+  BuildQueueItem,
+  FleetMission,
+  BattleResult,
+  SpyReport,
+  Officer,
+  SpiedNotification,
+  NPCActivityNotification,
+  IncomingFleetAlert,
+  MissileAttack
+} from '@/types/game'
 import { TechnologyType, OfficerType } from '@/types/game'
 import type { Locale } from '@/locales'
 import pkg from '../../package.json'

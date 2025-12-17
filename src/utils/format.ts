@@ -1,4 +1,3 @@
-
 /**
  * 格式化数字为英文单位（K, M, B, T, Q）
  * @param num 数字
@@ -32,6 +31,30 @@ export const getResourceColor = (current: number, max: number): string => {
   if (ratio >= 0.7) return 'text-yellow-600 dark:text-yellow-400'
   return ''
 }
+/**
+ * 格式化相对时间（用于显示"多久之前"）
+ * @param seconds 秒数
+ * @param t 翻译函数
+ * @returns 格式化后的相对时间字符串
+ */
+export const formatRelativeTime = (seconds: number, t: (key: string) => string): string => {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+
+  if (days > 0) {
+    return `${days}${t('time.days')}${hours}${t('time.hours')}`
+  }
+  if (hours > 0) {
+    return `${hours}${t('time.hours')}${minutes}${t('time.minutes')}`
+  }
+  if (minutes > 0) {
+    return `${minutes}${t('time.minutes')}`
+  }
+  return `${secs}${t('time.seconds')}`
+}
+
 /**
  * 格式化时间（秒转为 年:天:时:分:秒）
  * @param seconds 秒数

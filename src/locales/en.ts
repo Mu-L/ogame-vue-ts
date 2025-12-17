@@ -125,6 +125,7 @@ export default {
     roboticsFactory: 'Robotics Factory',
     naniteFactory: 'Nanite Factory',
     shipyard: 'Shipyard',
+    hangar: 'Hangar',
     researchLab: 'Research Lab',
     metalStorage: 'Metal Storage',
     crystalStorage: 'Crystal Storage',
@@ -163,6 +164,7 @@ export default {
     roboticsFactory: 'Accelerates construction speed',
     naniteFactory: 'Increases build queue capacity, +1 per level (max 10 levels)',
     shipyard: 'Constructs ships',
+    hangar: 'Specialized facility for expanding fleet storage capacity, supports planetary specialization',
     researchLab: 'Researches technologies',
     metalStorage: 'Increases metal storage capacity',
     crystalStorage: 'Increases crystal storage capacity',
@@ -197,10 +199,10 @@ export default {
     lightFighter: 'Basic combat unit',
     heavyFighter: 'Heavily armored fighter',
     cruiser: 'Medium warship, balanced offense and defense',
-    battleship: 'Powerful warship',
+    battleship: 'Main heavy warship with powerful firepower and strong defense',
     battlecruiser: 'Fast powerful warship, excels at attacking battleships',
     bomber: 'Specialized ship for attacking defense structures',
-    destroyer: 'Hunter specialized in destroying large ships',
+    destroyer: 'Specialized anti-capital ship with high firepower but low defense',
     smallCargo: 'Transports small amounts of resources',
     largeCargo: 'Transports large amounts of resources',
     colonyShip: 'Used to colonize new planets',
@@ -312,6 +314,8 @@ export default {
     darkMatterSpecialist: 'Improves dark matter collection efficiency'
   },
   queue: {
+    title: 'Build Queue',
+    empty: 'No active tasks',
     buildQueueBonus: 'Build Queue',
     spaceBonus: 'Space Bonus',
     buildSpeedBonus: 'Build Speed Bonus',
@@ -319,6 +323,7 @@ export default {
     researchQueueBonus: 'Research Queue',
     building: 'Building',
     researching: 'Researching',
+    demolishing: 'Demolishing',
     remaining: 'Remaining',
     cancel: 'Cancel',
     cancelBuild: 'Cancel Build',
@@ -477,7 +482,8 @@ export default {
     recallFleet: 'Recall Fleet',
     abortMission: 'Abort Mission',
     abortMissionTitle: 'Confirm Abort Mission',
-    abortMissionWarning: 'WARNING: Aborting this mission will permanently lose {ships} ships and {resources} resources!\n\nThis action is irreversible and the fleet and resources will not return.',
+    abortMissionWarning:
+      'WARNING: Aborting this mission will permanently lose {ships} ships and {resources} resources!\n\nThis action is irreversible and the fleet and resources will not return.',
     abortMissionSuccess: 'Mission Aborted',
     abortMissionSuccessMessage: 'Mission has been aborted, fleet and resources are lost.',
     sendFailed: 'Send Failed',
@@ -588,10 +594,12 @@ export default {
     battles: 'Battles',
     spy: 'Spy',
     npc: 'NPC',
+    diplomacy: 'Diplomacy',
     battleReports: 'Battle Reports',
     spyReports: 'Spy Reports',
     noBattleReports: 'No battle reports',
     noSpyReports: 'No spy reports',
+    noDiplomaticReports: 'No diplomatic reports',
     battleReport: 'Battle Report',
     spyReport: 'Spy Report',
     victory: 'Victory',
@@ -639,7 +647,38 @@ export default {
       hostile: 'They are hostile towards you and do not accept gifts',
       neutral_distrust: 'They lack trust in you',
       polite_decline: 'They politely declined'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: 'Spied Notification Details',
+    spyDetected: 'Spy Detected',
+    detectionResult: 'Detection Result',
+    detectionSuccess: 'Your spy probe was detected!',
+    spiedNotificationMessage: '{npc} attempted to spy on your planet {planet}',
+    spiedNotificationTip: 'Consider increasing your defense or counter-attacking if this NPC is hostile',
+    viewInGalaxy: 'View in Galaxy',
+    // Mission report dialog
+    missionReportDetails: 'Mission Report Details',
+    missionSuccess: 'Success',
+    missionFailed: 'Failed',
+    origin: 'Origin',
+    destination: 'Destination',
+    missionDetails: 'Mission Details',
+    transportedResources: 'Transported Resources',
+    recycledResources: 'Recycled Resources',
+    remainingDebris: 'Remaining Debris',
+    newPlanet: 'New Planet',
+    // NPC activity dialog
+    npcActivityDetails: 'NPC Activity Details',
+    activityType: {
+      recycle: 'Recycling Debris'
+    },
+    activityLocation: 'Activity Location',
+    position: 'Position',
+    nearPlanet: 'Near Planet',
+    activityDescription: 'Activity Description',
+    npcActivityMessage: '{npc} is {activity} at {position}',
+    arrivalTime: 'Arrival Time',
+    npcActivityTip: 'NPCs may collect debris from battles. You can try to reach the location first if you want to compete for resources'
   },
   missionReports: {
     transportSuccess: 'Transport mission completed successfully',
@@ -798,7 +837,8 @@ export default {
     npcWillSpyAndAttack: '{npcName} will spy in 5s and attack in 10s',
     acceleratedMissions: 'Accelerated {count} missions to 5 seconds',
     npcFleetInitialized: '{npcName} fleet initialized',
-    npcFleetDetails: '100 Spy Probes\n500 Light Fighters\n300 Heavy Fighters\n200 Cruisers\n100 Battleships\n50 Bombers\n30 Destroyers\n20 Battlecruisers',
+    npcFleetDetails:
+      '100 Spy Probes\n500 Light Fighters\n300 Heavy Fighters\n200 Cruisers\n100 Battleships\n50 Bombers\n30 Destroyers\n20 Battlecruisers',
     dangerZone: 'Danger Zone',
     dangerZoneDesc: 'The following operations are irreversible',
     resetGame: 'Reset Game',
@@ -806,7 +846,8 @@ export default {
     completeAllQueues: 'Complete All Queues',
     completeAllQueuesDesc: 'Instantly complete all building, research, ship, defense queues and fleet missions',
     completeQueues: 'Complete Queues',
-    completeQueuesSuccess: 'Completed {buildingCount} building queues, {researchCount} research queues, {missionCount} fleet missions, {missileCount} missile attacks'
+    completeQueuesSuccess:
+      'Completed {buildingCount} building queues, {researchCount} research queues, {missionCount} fleet missions, {missileCount} missile attacks'
   },
   alerts: {
     npcSpyIncoming: 'NPC Spy Probe Incoming',
@@ -836,6 +877,10 @@ export default {
     recentEvents: 'Recent Events',
     recentEventsDescription: 'Recent diplomatic activity log',
     ago: 'ago',
+    notifications: 'Diplomatic Notifications',
+    markAllRead: 'Mark All Read',
+    noReports: 'No diplomatic events',
+    viewAll: 'View All',
     status: {
       friendly: 'Friendly',
       neutral: 'Neutral',
@@ -851,6 +896,13 @@ export default {
       viewPlanets: 'View Planets'
     },
     lastEvent: 'Last Event',
+    reportDetails: 'Diplomatic Report Details',
+    eventDescription: 'Event Description',
+    reputationChange: 'Reputation Change',
+    before: 'Before',
+    after: 'After',
+    statusChange: 'Status Change',
+    viewDiplomacy: 'View Diplomacy Page',
     events: {
       gift: 'Sent Gift',
       attack: 'Attack',
@@ -863,7 +915,7 @@ export default {
       giftedResources: 'Gifted {metal}M {crystal}C {deuterium}D',
       receivedGiftFromPlayer: 'Received gift from player',
       giftedToNpc: 'You gifted resources to {npcName}. Reputation +{reputation}',
-      rejectedPlayerGift: 'Rejected player\'s gift',
+      rejectedPlayerGift: "Rejected player's gift",
       npcRejectedGift: '{npcName} rejected your gift. Reputation {reputation}',
       attackedNpc: 'Attacked {npcName}',
       wasAttackedByPlayer: 'Was attacked by player',
@@ -872,14 +924,21 @@ export default {
       allyDispleased: '{allyName} is displeased that you attacked their ally {targetName}',
       wasSpiedByPlayer: 'Was spied by player (detected: {detected})',
       spyDetected: 'Your espionage was detected by {npcName}',
-      stoleDebrisFromTerritory: 'Stole debris from {npcName}\'s territory',
+      stoleDebrisFromTerritory: "Stole debris from {npcName}'s territory",
       playerStoleDebris: 'Player stole debris from territory',
-      recycledDebrisNearNpc: 'You recycled debris near {npcName}\'s planet. They are displeased.',
+      recycledDebrisNearNpc: "You recycled debris near {npcName}'s planet. They are displeased.",
       giftedResourcesToPlayer: 'Gifted resources to player',
       receivedGiftFromNpc: 'Received gift from {npcName}',
       acceptedGiftFromNpc: 'You accepted a gift from {npcName}: {metal}M {crystal}C {deuterium}D',
       playerRejectedGift: 'Player rejected gift',
-      rejectedGiftFromNpc: 'You rejected a gift from {npcName}. Reputation {reputation}'
+      rejectedGiftFromNpc: 'You rejected a gift from {npcName}. Reputation {reputation}',
+      destroyedNpcPlanet: "Destroyed {npcName}'s {planetName}",
+      playerDestroyedPlanet: 'Player destroyed {planetName}',
+      youDestroyedNpcPlanet: "You destroyed {npcName}'s {planetName}. Reputation {reputation}",
+      playerDestroyedAllyPlanet: "Player destroyed ally {allyName}'s {planetName}",
+      allyOutraged: "{allyName} is outraged that you destroyed their ally {targetName}'s {planetName}",
+      npcEliminated: 'NPC {npcName} has been completely eliminated',
+      npcEliminatedMessage: "You destroyed all of {npcName}'s planets! This faction has been completely wiped out."
     }
   },
   pagination: {
@@ -893,5 +952,162 @@ export default {
     title: 'Page Not Found',
     description: 'Sorry, the page you are looking for does not exist',
     goHome: 'Go Home'
+  },
+  time: {
+    days: 'days',
+    hours: 'hours',
+    minutes: 'minutes',
+    seconds: 'seconds'
+  },
+  tutorial: {
+    progress: 'Progress',
+    previous: 'Previous',
+    next: 'Next',
+    gotIt: 'Got It',
+    completeButton: 'Complete',
+    skip: 'Skip Tutorial',
+    welcome: {
+      title: 'Welcome to OGame',
+      content:
+        'Welcome, Commander! This tutorial will guide you through the basics of building your empire. Click "Next" to begin your journey.'
+    },
+    resources: {
+      title: 'Resource Overview',
+      content:
+        'These are your resources: Metal, Crystal, and Deuterium. They are essential for building structures and researching technologies. Energy is also important to power your infrastructure.'
+    },
+    planet: {
+      title: 'Your Planet',
+      content: 'This is your home planet. You can view its name, coordinates, and switch between planets here as you expand your empire.'
+    },
+    navigation: {
+      title: 'Navigation Menu',
+      content:
+        'Use this menu to navigate between different sections: Buildings, Research, Fleet, Galaxy, and more. Each section offers unique gameplay features.'
+    },
+    gotoBuildings: {
+      title: 'Go to Buildings',
+      content: 'Let\'s start by building some structures. Click on the "Buildings" menu item to view available structures.'
+    },
+    buildSolarPlant: {
+      title: 'Build Solar Plant',
+      content:
+        'First, build a Solar Plant! It generates energy for your planet. Without energy, other resource buildings cannot function. This is the most important first step.'
+    },
+    waitBuild: {
+      title: 'Build Queue',
+      content:
+        'Your building is now in the construction queue. Click the queue icon in the top-right corner to view all ongoing construction and research tasks. Buildings take time to complete, but you can continue working while waiting.'
+    },
+    buildMetalMine: {
+      title: 'Build Metal Mine',
+      content:
+        "Now that you have energy, you can build the Metal Mine. It's your primary source of metal, which is used in almost every structure and ship."
+    },
+    buildCrystalMine: {
+      title: 'Build Crystal Mine',
+      content: 'Crystal is rarer but essential for advanced technologies. Build a Crystal Mine to start collecting this valuable resource.'
+    },
+    buildDeuterium: {
+      title: 'Build Deuterium Synthesizer',
+      content:
+        'Deuterium is essential for ship fuel and advanced research. Build a Deuterium Synthesizer to start producing this critical resource.'
+    },
+    upgradeMines: {
+      title: 'Upgrade Resource Mines',
+      content:
+        'Next, you need to upgrade all three resource mines (Metal, Crystal, Deuterium) to level 2 to meet the requirements for building a Robotics Factory. Upgrade them when you have enough resources.'
+    },
+    buildRobotics: {
+      title: 'Build Robotics Factory',
+      content:
+        'The Robotics Factory significantly speeds up construction. It requires Metal Mine, Crystal Mine, and Deuterium Synthesizer at level 2 each. Build it to improve construction efficiency!'
+    },
+    upgradeMinesForLab: {
+      title: 'Continue Upgrading Mines',
+      content:
+        'Now you need to upgrade all three resource mines to level 3 to meet the requirements for the Research Lab. Keep developing your resource production.'
+    },
+    buildResearchLab: {
+      title: 'Build Research Lab',
+      content:
+        'The Research Lab is the foundation of technological advancement. It requires all three resource mines at level 3. Build it to unlock technology research!'
+    },
+    gotoResearch: {
+      title: 'Go to Research',
+      content: 'Now that you have a Research Lab, click on the "Research" menu to view available technologies.'
+    },
+    researchEnergy: {
+      title: 'Research Energy Technology',
+      content:
+        "Energy Technology improves your energy production and unlocks advanced structures. It's one of the most fundamental and important technologies."
+    },
+    shipyardIntro: {
+      title: 'Fleet and Shipyard',
+      content:
+        'Ships allow you to explore the galaxy, transport resources, and defend your empire. To build ships, you need a Shipyard (requires Robotics Factory level 2).'
+    },
+    gotoBuildingsForShipyard: {
+      title: 'Return to Buildings',
+      content: 'Go back to the Buildings page to construct your Shipyard.'
+    },
+    buildShipyard: {
+      title: 'Build Shipyard',
+      content: 'The Shipyard allows you to construct ships and defense systems. This is crucial for fleet operations.'
+    },
+    fleetIntro: {
+      title: 'Fleet Operations',
+      content:
+        'Once you have ships, you can send them on missions: transport resources, colonize planets, attack enemies, or explore debris fields.'
+    },
+    galaxyIntro: {
+      title: 'Explore the Galaxy',
+      content:
+        'The Galaxy view shows other planets, debris fields, and opportunities for expansion. Use it to scout targets and plan your strategy.'
+    },
+    complete: {
+      title: 'Tutorial Complete!',
+      content:
+        'Congratulations, Commander! You now know the basics. Continue building your empire, research technologies, and explore the galaxy. Remember: develop energy first, then resources, then factories and research! Good luck!'
+    },
+    // Mobile tutorial
+    mobile: {
+      welcome: {
+        title: 'Welcome to OGame (Mobile)',
+        content:
+          "Welcome, Commander! This is a streamlined tutorial designed for touchscreens. We'll quickly cover the core features to get you started building your empire."
+      },
+      resources: {
+        title: 'Top Resource Bar',
+        content: 'At the top, you see your resources: Metal, Crystal, and Deuterium. Tap to view detailed production info.'
+      },
+      menu: {
+        title: 'Open Navigation Menu',
+        content:
+          'Tap this menu icon to open the navigation bar. You can access Buildings, Research, Fleet, and all other features from here.'
+      },
+      gotoBuildings: {
+        title: 'Go to Buildings Page',
+        content: 'The menu is now open! Now tap "Buildings" to start constructing your infrastructure.'
+      },
+      buildSolarPlant: {
+        title: 'Build Solar Plant',
+        content: 'First, build a Solar Plant! Scroll down to find it and tap the card to build. Energy is the foundation of everything.'
+      },
+      waitBuild: {
+        title: 'Build Queue',
+        content:
+          'Click the queue icon in the top-right corner to view build progress. You can continue browsing other pages - construction happens in the background.'
+      },
+      buildMetalMine: {
+        title: 'Build Metal Mine',
+        content: 'Now that you have energy, build a Metal Mine. Scroll down to find it and tap to build.'
+      },
+      complete: {
+        title: 'Quick Tutorial Complete!',
+        content:
+          "Great! You've mastered the basics. Continue building Crystal and Deuterium facilities, then explore other features. Remember: energy first, then resources!"
+      }
+    }
   }
 }

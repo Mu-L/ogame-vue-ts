@@ -22,7 +22,7 @@
           <div
             class="h-full transition-all duration-300"
             :class="fleetStorageUsage > maxFleetStorage ? 'bg-destructive' : 'bg-primary'"
-            :style="{ width: `${Math.min((fleetStorageUsage / maxFleetStorage) * 100, 100)}%` }"
+            :style="{ width: `${maxFleetStorage > 0 ? Math.min((fleetStorageUsage / maxFleetStorage) * 100, 100) : 0}%` }"
           />
         </div>
       </div>
@@ -216,13 +216,13 @@
     [ShipType.Deathstar]: 0
   })
 
-  const buildShip = (shipType: ShipType, quantity: number): boolean => {
-    if (!gameStore.currentPlanet) return false
+  const buildShip = (shipType: ShipType, quantity: number): { success: boolean; reason?: string } => {
+    if (!gameStore.currentPlanet) return { success: false }
     const validation = shipValidation.validateShipBuild(gameStore.currentPlanet, shipType, quantity, gameStore.player.technologies)
-    if (!validation.valid) return false
+    if (!validation.valid) return { success: false, reason: validation.reason }
     const queueItem = shipValidation.executeShipBuild(gameStore.currentPlanet, shipType, quantity, gameStore.player.officers)
     gameStore.currentPlanet.buildQueue.push(queueItem)
-    return true
+    return { success: true }
   }
 
   // 建造舰船
@@ -235,10 +235,10 @@
       return
     }
 
-    const success = buildShip(shipType, quantity)
-    if (!success) {
+    const result = buildShip(shipType, quantity)
+    if (!result.success) {
       alertDialogTitle.value = t('shipyardView.buildFailed')
-      alertDialogMessage.value = t('shipyardView.buildFailedMessage')
+      alertDialogMessage.value = result.reason ? t(result.reason) : t('shipyardView.buildFailedMessage')
       alertDialogOpen.value = true
     } else {
       quantities.value[shipType] = 0
@@ -258,6 +258,11 @@
       crystal: config.cost.crystal * quantity,
       deuterium: config.cost.deuterium * quantity,
       darkMatter: config.cost.darkMatter * quantity
+    }
+
+    // 检查舰队仓储空间是否足够
+    if (!fleetStorageLogic.hasEnoughFleetStorage(planet.value, shipType, quantity, gameStore.player.technologies)) {
+      return false
     }
 
     return (

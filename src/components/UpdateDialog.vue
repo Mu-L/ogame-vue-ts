@@ -7,7 +7,7 @@
       </DialogHeader>
 
       <div class="flex-1 overflow-y-auto min-h-0 mt-4 pr-2">
-        <div class="prose prose-sm dark:prose-invert max-w-none" v-html="renderedMarkdown"></div>
+        <div class="prose prose-sm dark:prose-invert max-w-none" v-html="renderedMarkdown" />
       </div>
 
       <DialogFooter class="flex gap-2 flex-shrink-0 mt-4">

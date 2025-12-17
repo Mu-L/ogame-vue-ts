@@ -61,10 +61,7 @@ export const simulateBattle = async (
 
   // 计算月球生成概率（根据残骸场总量）
   const totalDebris = debrisField.metal + debrisField.crystal
-  const moonChance = Math.min(
-    (MOON_CONFIG.baseChance + Math.floor(totalDebris / MOON_CONFIG.chancePerDebris)),
-    MOON_CONFIG.maxChance
-  ) / 100 // 转换为0-1的概率
+  const moonChance = Math.min(MOON_CONFIG.baseChance + Math.floor(totalDebris / MOON_CONFIG.chancePerDebris), MOON_CONFIG.maxChance) / 100 // 转换为0-1的概率
 
   // 生成战斗报告
   const battleResult: BattleResult = {

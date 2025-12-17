@@ -39,7 +39,12 @@ export const calculateMaxFleetStorage = (planet: Planet, technologies: Record<Te
   const shipyardBonus = BUILDINGS[BuildingType.Shipyard].fleetStorageBonus || 0
   maxStorage += shipyardLevel * shipyardBonus
 
-  // 3. 计算机技术全局加成
+  // 3. 机库建筑加成（每个星球独立）
+  const hangarLevel = planet.buildings[BuildingType.Hangar] || 0
+  const hangarBonus = BUILDINGS[BuildingType.Hangar].fleetStorageBonus || 0
+  maxStorage += hangarLevel * hangarBonus
+
+  // 4. 计算机技术全局加成
   const computerTechLevel = technologies[TechnologyType.ComputerTechnology] || 0
   const computerTechBonus = TECHNOLOGIES[TechnologyType.ComputerTechnology].fleetStorageBonus || 0
   maxStorage += computerTechLevel * computerTechBonus
@@ -82,5 +87,9 @@ export const getMaxBuildableShips = (planet: Planet, shipType: ShipType, technol
   const shipStorageUsage = SHIPS[shipType].storageUsage
 
   if (shipStorageUsage === 0) return Number.MAX_SAFE_INTEGER
+
+  // 如果当前已经超限（舰队返回等情况），则不允许建造新舰船
+  if (availableStorage <= 0) return 0
+
   return Math.floor(availableStorage / shipStorageUsage)
 }

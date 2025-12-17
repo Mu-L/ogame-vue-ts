@@ -14,6 +14,7 @@ import type {
   Resources,
   Player,
   NPC,
+  Planet,
   FleetMission,
   BattleResult,
   Position,
@@ -529,19 +530,172 @@ export const handleDebrisRecycleReputation = (player: Player, debrisPosition: Po
 }
 
 /**
+ * 处理星球摧毁事件的好感度变化
+ * 摧毁星球是最严重的行为，直接导致敌对关系
+ * @param attacker 攻击者（玩家）
+ * @param destroyedPlanet 被摧毁的星球
+ * @param planetOwner 星球所有者（NPC）
+ * @param allNpcs 所有NPC列表
+ * @param locale 语言代码
+ */
+export const handlePlanetDestructionReputation = (
+  attacker: Player,
+  destroyedPlanet: Planet,
+  planetOwner: NPC,
+  allNpcs: NPC[],
+  locale: Locale
+): void => {
+  const { HOSTILE_THRESHOLD } = DIPLOMATIC_CONFIG
+  const now = Date.now()
+
+  // 更新玩家对被摧毁星球所有者的关系 - 直接设为敌对
+  if (!attacker.diplomaticRelations) {
+    attacker.diplomaticRelations = {}
+  }
+
+  const relation = getOrCreateRelation(attacker.diplomaticRelations, attacker.id, planetOwner.id)
+  const eventDescription = t('diplomacy.reports.destroyedNpcPlanet', locale, {
+    npcName: planetOwner.name,
+    planetName: destroyedPlanet.name
+  })
+
+  attacker.diplomaticRelations[planetOwner.id] = {
+    ...relation,
+    reputation: HOSTILE_THRESHOLD, // 直接设为敌对阈值
+    status: RS.Hostile,
+    lastUpdated: now,
+    history: [
+      ...(relation.history || []),
+      {
+        timestamp: now,
+        change: HOSTILE_THRESHOLD - relation.reputation,
+        reason: DET.DestroyPlanet,
+        details: eventDescription
+      }
+    ]
+  }
+
+  // 更新星球所有者对玩家的关系 - 直接设为敌对
+  if (!planetOwner.relations) {
+    planetOwner.relations = {}
+  }
+
+  const ownerRelation = getOrCreateRelation(planetOwner.relations, planetOwner.id, attacker.id)
+  const ownerEventDescription = t('diplomacy.reports.playerDestroyedPlanet', locale, {
+    planetName: destroyedPlanet.name
+  })
+
+  planetOwner.relations[attacker.id] = {
+    ...ownerRelation,
+    reputation: HOSTILE_THRESHOLD, // 直接设为敌对阈值
+    status: RS.Hostile,
+    lastUpdated: now,
+    history: [
+      ...(ownerRelation.history || []),
+      {
+        timestamp: now,
+        change: HOSTILE_THRESHOLD - ownerRelation.reputation,
+        reason: DET.DestroyPlanet,
+        details: ownerEventDescription
+      }
+    ]
+  }
+
+  // 生成外交报告
+  generateDiplomaticReport(
+    attacker,
+    planetOwner,
+    DET.DestroyPlanet,
+    HOSTILE_THRESHOLD,
+    t('diplomacy.reports.youDestroyedNpcPlanet', locale, {
+      npcName: planetOwner.name,
+      planetName: destroyedPlanet.name,
+      reputation: HOSTILE_THRESHOLD
+    }),
+    'diplomacy.reports.youDestroyedNpcPlanet',
+    { npcName: planetOwner.name, planetName: destroyedPlanet.name, reputation: HOSTILE_THRESHOLD }
+  )
+
+  // 检查盟友关系网络 - 摧毁星球对盟友的影响更严重
+  if (planetOwner.allies && planetOwner.allies.length > 0) {
+    handleAllyPlanetDestroyedReputation(attacker, planetOwner, destroyedPlanet, allNpcs, locale)
+  }
+}
+
+/**
+ * 处理盟友星球被摧毁的好感度变化
+ * @param attacker 攻击者（玩家）
+ * @param attackedNpc 星球被摧毁的NPC
+ * @param destroyedPlanet 被摧毁的星球
+ * @param allNpcs 所有NPC列表
+ * @param locale 语言代码
+ */
+export const handleAllyPlanetDestroyedReputation = (
+  attacker: Player,
+  attackedNpc: NPC,
+  destroyedPlanet: Planet,
+  allNpcs: NPC[],
+  locale: Locale
+): void => {
+  const { REPUTATION_CHANGES } = DIPLOMATIC_CONFIG
+
+  // 找到所有盟友
+  const allies = allNpcs.filter(npc => attackedNpc.allies?.includes(npc.id))
+
+  allies.forEach(ally => {
+    // 更新盟友对玩家的关系 - 摧毁盟友星球的惩罚是攻击的两倍
+    if (!ally.relations) {
+      ally.relations = {}
+    }
+
+    const allyRelation = getOrCreateRelation(ally.relations, ally.id, attacker.id)
+    const reputationLoss = REPUTATION_CHANGES.ALLY_ATTACKED * 2 // 双倍惩罚
+    ally.relations[attacker.id] = updateReputation(
+      allyRelation,
+      reputationLoss,
+      DET.DestroyPlanet,
+      t('diplomacy.reports.playerDestroyedAllyPlanet', locale, { allyName: attackedNpc.name, planetName: destroyedPlanet.name })
+    )
+
+    // 生成外交报告
+    generateDiplomaticReport(
+      attacker,
+      ally,
+      DET.DestroyPlanet,
+      reputationLoss,
+      t('diplomacy.reports.allyOutraged', locale, {
+        allyName: ally.name,
+        targetName: attackedNpc.name,
+        planetName: destroyedPlanet.name
+      }),
+      'diplomacy.reports.allyOutraged',
+      {
+        allyName: ally.name,
+        targetName: attackedNpc.name,
+        planetName: destroyedPlanet.name
+      }
+    )
+  })
+}
+
+/**
  * 生成外交报告
  * @param player 玩家
  * @param npc NPC
  * @param eventType 事件类型
  * @param reputationChange 好感度变化值
- * @param message 消息内容
+ * @param message 消息内容（已弃用，用于向后兼容）
+ * @param messageKey 翻译键（可选）
+ * @param messageParams 翻译参数（可选）
  */
 const generateDiplomaticReport = (
   player: Player,
   npc: NPC,
   eventType: DiplomaticEventType,
   reputationChange: number,
-  message: string
+  message: string,
+  messageKey?: string,
+  messageParams?: Record<string, string | number>
 ): void => {
   if (!player.diplomaticReports) {
     player.diplomaticReports = []
@@ -570,6 +724,8 @@ const generateDiplomaticReport = (
     oldStatus,
     newStatus,
     message,
+    messageKey,
+    messageParams,
     read: false
   }
 
@@ -723,4 +879,79 @@ export const rejectNPCGift = (player: Player, npc: NPC, giftNotification: GiftNo
   if (player.giftNotifications) {
     player.giftNotifications = player.giftNotifications.filter(n => n.id !== giftNotification.id)
   }
+}
+
+/**
+ * 处理NPC被彻底消灭（所有星球被摧毁）
+ * @param eliminatedNpc 被消灭的NPC
+ * @param player 玩家
+ * @param allNpcs 所有NPC列表
+ * @param locale 语言代码
+ */
+export const handleNPCElimination = (eliminatedNpc: NPC, player: Player, allNpcs: NPC[], locale: Locale): void => {
+  const { HOSTILE_THRESHOLD } = DIPLOMATIC_CONFIG
+
+  // 1. 将玩家对该NPC的关系设为最低（敌对状态）
+  if (!player.diplomaticRelations) {
+    player.diplomaticRelations = {}
+  }
+
+  const relation = getOrCreateRelation(player.diplomaticRelations, player.id, eliminatedNpc.id)
+  const now = Date.now()
+
+  player.diplomaticRelations[eliminatedNpc.id] = {
+    ...relation,
+    reputation: HOSTILE_THRESHOLD, // 设为敌对阈值
+    status: RS.Hostile,
+    lastUpdated: now,
+    history: [
+      ...(relation.history || []),
+      {
+        timestamp: now,
+        change: HOSTILE_THRESHOLD - relation.reputation,
+        reason: DET.DestroyPlanet,
+        details: t('diplomacy.reports.npcEliminated', locale, { npcName: eliminatedNpc.name })
+      }
+    ]
+  }
+
+  // 2. 生成外交报告
+  generateDiplomaticReport(
+    player,
+    eliminatedNpc,
+    DET.DestroyPlanet,
+    HOSTILE_THRESHOLD,
+    t('diplomacy.reports.npcEliminatedMessage', locale, { npcName: eliminatedNpc.name }),
+    'diplomacy.reports.npcEliminatedMessage',
+    { npcName: eliminatedNpc.name }
+  )
+
+  // 3. 从所有其他NPC的盟友列表中移除被消灭的NPC
+  allNpcs.forEach(npc => {
+    if (npc.id !== eliminatedNpc.id && npc.allies && npc.allies.includes(eliminatedNpc.id)) {
+      npc.allies = npc.allies.filter(allyId => allyId !== eliminatedNpc.id)
+    }
+  })
+}
+
+/**
+ * 检查并处理被消灭的NPC（所有星球都被摧毁的NPC）
+ * @param allNpcs 所有NPC列表
+ * @param player 玩家
+ * @param locale 语言代码
+ * @returns 被消灭的NPC ID列表
+ */
+export const checkAndHandleEliminatedNPCs = (allNpcs: NPC[], player: Player, locale: Locale): string[] => {
+  const eliminatedNpcIds: string[] = []
+
+  allNpcs.forEach(npc => {
+    // 检查NPC是否还有星球
+    if (!npc.planets || npc.planets.length === 0) {
+      // NPC被彻底消灭
+      handleNPCElimination(npc, player, allNpcs, locale)
+      eliminatedNpcIds.push(npc.id)
+    }
+  })
+
+  return eliminatedNpcIds
 }

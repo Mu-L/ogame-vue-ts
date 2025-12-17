@@ -8,6 +8,7 @@ export default {
     close: 'Закрыть',
     back: 'Назад',
     next: 'Далее',
+    gotIt: '',
     previous: 'Предыдущий',
     submit: 'Отправить',
     reset: 'Сбросить',
@@ -125,6 +126,7 @@ export default {
     roboticsFactory: 'Фабрика роботов',
     naniteFactory: 'Нанитная фабрика',
     shipyard: 'Верфь',
+    hangar: 'Ангар',
     researchLab: 'Исследовательская лаборатория',
     metalStorage: 'Хранилище металла',
     crystalStorage: 'Хранилище кристалла',
@@ -165,6 +167,7 @@ export default {
     roboticsFactory: 'Ускоряет скорость строительства',
     naniteFactory: 'Увеличивает вместимость очереди строительства, +1 за уровень (макс 10 уровней)',
     shipyard: 'Строит корабли',
+    hangar: 'Специализированное сооружение для расширения вместимости флота, поддерживает специализацию планет',
     researchLab: 'Исследует технологии',
     metalStorage: 'Увеличивает ёмкость хранилища металла',
     crystalStorage: 'Увеличивает ёмкость хранилища кристалла',
@@ -199,10 +202,10 @@ export default {
     lightFighter: 'Базовая боевая единица',
     heavyFighter: 'Тяжелобронированный истребитель',
     cruiser: 'Средний боевой корабль, сбалансированная атака и защита',
-    battleship: 'Мощный боевой корабль',
+    battleship: 'Основной тяжёлый боевой корабль с мощной огневой мощью и высокой защитой',
     battlecruiser: 'Быстрый мощный боевой корабль, отлично атакует линкоры',
     bomber: 'Специализированный корабль для атаки оборонительных сооружений',
-    destroyer: 'Охотник, специализирующийся на уничтожении крупных кораблей',
+    destroyer: 'Специализированный противокапитальный корабль с высокой огневой мощью, но низкой защитой',
     smallCargo: 'Транспортирует небольшое количество ресурсов',
     largeCargo: 'Транспортирует большое количество ресурсов',
     colonyShip: 'Используется для колонизации новых планет',
@@ -313,10 +316,13 @@ export default {
     darkMatterSpecialist: 'Улучшает эффективность сбора тёмной материи'
   },
   queue: {
+    title: 'Очередь строительства',
+    empty: 'Нет активных задач',
     buildQueue: 'Очередь строительства',
     researchQueue: 'Очередь исследований',
     building: 'Строится',
     researching: 'Исследуется',
+    demolishing: 'Сносится',
     remaining: 'Осталось',
     cancel: 'Отменить',
     cancelBuild: 'Отменить строительство',
@@ -588,10 +594,12 @@ export default {
     battles: 'Битвы',
     spy: 'Разведка',
     npc: 'NPC',
+    diplomacy: '',
     battleReports: 'Отчёты о боях',
     spyReports: 'Отчёты разведки',
     noBattleReports: 'Нет отчётов о боях',
     noSpyReports: 'Нет отчётов разведки',
+    noDiplomaticReports: '',
     battleReport: 'Отчёт о бое',
     spyReport: 'Отчёт разведки',
     victory: 'Победа',
@@ -647,7 +655,38 @@ export default {
       hostile: 'Они враждебны и не принимают подарки',
       neutral_distrust: 'Они вам не доверяют',
       polite_decline: 'Вежливо отказались'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: '',
+    spyDetected: '',
+    detectionResult: '',
+    detectionSuccess: '',
+    spiedNotificationMessage: '',
+    spiedNotificationTip: '',
+    viewInGalaxy: '',
+    // Mission report dialog
+    missionReportDetails: '',
+    missionSuccess: '',
+    missionFailed: '',
+    origin: '',
+    destination: '',
+    missionDetails: '',
+    transportedResources: '',
+    recycledResources: '',
+    remainingDebris: '',
+    newPlanet: '',
+    // NPC activity dialog
+    npcActivityDetails: '',
+    activityType: {
+      recycle: ''
+    },
+    activityLocation: '',
+    position: '',
+    nearPlanet: '',
+    activityDescription: '',
+    npcActivityMessage: '',
+    arrivalTime: '',
+    npcActivityTip: ''
   },
   missionReports: {
     transportSuccess: 'Миссия транспортировки успешно завершена',
@@ -801,7 +840,8 @@ export default {
     npcWillSpyAndAttack: '{npcName} проведет разведку через 5с и атакует через 10с',
     acceleratedMissions: 'Ускорено {count} миссий до 5 секунд',
     npcFleetInitialized: 'Флот {npcName} инициализирован',
-    npcFleetDetails: '100 шпионских зондов\n500 легких истребителей\n300 тяжелых истребителей\n200 крейсеров\n100 линкоров\n50 бомбардировщиков\n30 эсминцев\n20 линейных крейсеров',
+    npcFleetDetails:
+      '100 шпионских зондов\n500 легких истребителей\n300 тяжелых истребителей\n200 крейсеров\n100 линкоров\n50 бомбардировщиков\n30 эсминцев\n20 линейных крейсеров',
     dangerZone: 'Опасная зона',
     dangerZoneDesc: 'Следующие операции необратимы',
     resetGame: 'Сбросить игру',
@@ -839,6 +879,10 @@ export default {
     recentEvents: 'Недавние события',
     recentEventsDescription: 'Журнал последних дипломатических действий',
     ago: 'назад',
+    notifications: '',
+    markAllRead: '',
+    noReports: '',
+    viewAll: '',
     status: {
       friendly: 'Дружественный',
       neutral: 'Нейтральный',
@@ -854,10 +898,17 @@ export default {
       viewPlanets: 'Посмотреть планеты'
     },
     lastEvent: 'Последнее событие',
+    reportDetails: '',
+    eventDescription: '',
+    reputationChange: '',
+    before: '',
+    after: '',
+    statusChange: '',
+    viewDiplomacy: '',
     events: {
       gift: 'Подарок отправлен',
       attack: 'Атака',
-    missileAttack: 'Ракетная атака',
+      missileAttack: 'Ракетная атака',
       allyAttacked: 'Союзник атакован',
       spy: 'Шпионаж',
       stealDebris: 'Обломки украдены'
@@ -882,12 +933,20 @@ export default {
       receivedGiftFromNpc: 'Получен подарок от {npcName}',
       acceptedGiftFromNpc: 'Вы приняли подарок от {npcName}: {metal}M {crystal}C {deuterium}D',
       playerRejectedGift: 'Игрок отклонил подарок',
-      rejectedGiftFromNpc: 'Вы отклонили подарок от {npcName}. Репутация {reputation}'
+      rejectedGiftFromNpc: 'Вы отклонили подарок от {npcName}. Репутация {reputation}',
+      destroyedNpcPlanet: 'Уничтожена {planetName} игрока {npcName}',
+      playerDestroyedPlanet: 'Игрок уничтожил {planetName}',
+      youDestroyedNpcPlanet: 'Вы уничтожили {planetName} игрока {npcName}. Репутация {reputation}',
+      playerDestroyedAllyPlanet: 'Игрок уничтожил {planetName} союзника {allyName}',
+      allyOutraged: '{allyName} возмущен тем, что вы уничтожили {planetName} их союзника {targetName}',
+      npcEliminated: 'NPC {npcName} полностью уничтожен',
+      npcEliminatedMessage: 'Вы уничтожили все планеты {npcName}! Эта фракция полностью уничтожена.'
     }
   },
   pagination: {
     previous: 'Предыдущая',
     next: 'Следующая',
+    gotIt: '',
     first: 'Первая',
     last: 'Последняя',
     page: 'Страница {page}'
@@ -896,5 +955,39 @@ export default {
     title: 'Страница не найдена',
     description: 'Извините, страница, которую вы ищете, не существует',
     goHome: 'На главную'
+  },
+  time: {
+    days: 'дней',
+    hours: 'часов',
+    minutes: 'минут',
+    seconds: 'секунд'
+  },
+  tutorial: {
+    welcome: {
+      title: 'Добро пожаловать в OGame',
+      content: 'Добро пожаловать, Командир! Давайте начнём с основ и построим вашу космическую империю.'
+    },
+    buildSolarPlant: {
+      title: 'Постройте солнечную электростанцию',
+      content:
+        'Сначала постройте солнечную электростанцию! Она обеспечивает энергией вашу планету. Без энергии другие ресурсные здания не могут функционировать. Это самый важный первый шаг.'
+    },
+    waitBuild: {
+      title: 'Очередь строительства',
+      content:
+        'Ваше здание теперь в очереди строительства. Нажмите на значок очереди в правом верхнем углу, чтобы увидеть все текущие задачи строительства и исследований. Строительство занимает время, но вы можете продолжать работать во время ожидания.'
+    },
+    mobile: {
+      welcome: {
+        title: 'Добро пожаловать в OGame (Мобильная версия)',
+        content:
+          'Добро пожаловать, Командир! Это упрощённое руководство, разработанное для сенсорных экранов. Мы быстро рассмотрим основные функции, чтобы вы могли начать строить свою империю.'
+      },
+      waitBuild: {
+        title: 'Очередь строительства',
+        content:
+          'Нажмите на значок очереди в правом верхнем углу, чтобы увидеть прогресс строительства. Вы можете продолжать просматривать другие страницы - строительство происходит в фоновом режиме.'
+      }
+    }
   }
 }

@@ -41,3 +41,9 @@
 
   const props = defineProps<ToasterProps>()
 </script>
+
+<style>
+  .dark [data-sonner-toast][data-styled='true'] [data-description] {
+    color: oklch(0.91 0 0 / 1);
+  }
+</style>

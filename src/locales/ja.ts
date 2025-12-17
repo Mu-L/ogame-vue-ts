@@ -8,6 +8,7 @@ export default {
     close: '閉じる',
     back: '戻る',
     next: '次へ',
+    gotIt: '',
     previous: '前へ',
     submit: '送信',
     reset: 'リセット',
@@ -125,6 +126,7 @@ export default {
     roboticsFactory: 'ロボット工場',
     naniteFactory: 'ナノマシン工場',
     shipyard: '造船所',
+    hangar: '格納庫',
     researchLab: '研究所',
     metalStorage: '金属倉庫',
     crystalStorage: 'クリスタル倉庫',
@@ -165,6 +167,7 @@ export default {
     roboticsFactory: '建設速度を向上',
     naniteFactory: '建設キュー数を増加、レベル毎に+1（最大10レベル）',
     shipyard: '艦船を建造',
+    hangar: '艦隊収容能力を拡張する専用施設、惑星の専門化をサポート',
     researchLab: '技術を研究',
     metalStorage: '金属の貯蔵上限を増加',
     crystalStorage: 'クリスタルの貯蔵上限を増加',
@@ -199,10 +202,10 @@ export default {
     lightFighter: '基本戦闘ユニット',
     heavyFighter: '重装甲戦闘機',
     cruiser: '中型戦艦、攻守バランス型',
-    battleship: '強力な戦艦',
+    battleship: '主力重戦艦、強力な火力と高い防御力を持つ',
     battlecruiser: '高速強力な戦闘艦、戦艦への攻撃に優れる',
     bomber: '防御施設への攻撃に特化した艦船',
-    destroyer: '大型艦の破壊に特化したハンター',
+    destroyer: '対大型艦専用艦、高火力だが防御力が低い',
     smallCargo: '少量の資源を輸送',
     largeCargo: '大量の資源を輸送',
     colonyShip: '新惑星の植民に使用',
@@ -312,10 +315,13 @@ export default {
     darkMatterSpecialist: 'ダークマター採取効率を向上'
   },
   queue: {
+    title: '建設キュー',
+    empty: '進行中のタスクはありません',
     buildQueue: '建設キュー',
     researchQueue: '研究キュー',
     building: '建設中',
     researching: '研究中',
+    demolishing: '解体中',
     remaining: '残り時間',
     cancel: 'キャンセル',
     cancelBuild: '建設キャンセル',
@@ -580,10 +586,12 @@ export default {
     battles: '戦闘',
     spy: 'スパイ',
     npc: 'NPC',
+    diplomacy: '',
     battleReports: '戦闘レポート',
     spyReports: 'スパイレポート',
     noBattleReports: '戦闘レポートなし',
     noSpyReports: 'スパイレポートなし',
+    noDiplomaticReports: '',
     battleReport: '戦闘レポート',
     spyReport: 'スパイレポート',
     victory: '勝利',
@@ -639,7 +647,38 @@ export default {
       hostile: '相手は敵対的でギフトを受け取りません',
       neutral_distrust: '相手はあなたを信頼していません',
       polite_decline: '丁重に断りました'
-    }
+    },
+    // Spied notification dialog
+    spiedNotificationDetails: '',
+    spyDetected: '',
+    detectionResult: '',
+    detectionSuccess: '',
+    spiedNotificationMessage: '',
+    spiedNotificationTip: '',
+    viewInGalaxy: '',
+    // Mission report dialog
+    missionReportDetails: '',
+    missionSuccess: '',
+    missionFailed: '',
+    origin: '',
+    destination: '',
+    missionDetails: '',
+    transportedResources: '',
+    recycledResources: '',
+    remainingDebris: '',
+    newPlanet: '',
+    // NPC activity dialog
+    npcActivityDetails: '',
+    activityType: {
+      recycle: ''
+    },
+    activityLocation: '',
+    position: '',
+    nearPlanet: '',
+    activityDescription: '',
+    npcActivityMessage: '',
+    arrivalTime: '',
+    npcActivityTip: ''
   },
   missionReports: {
     transportSuccess: '輸送ミッションが正常に完了しました',
@@ -831,6 +870,10 @@ export default {
     recentEvents: '最近のイベント',
     recentEventsDescription: '最近の外交活動ログ',
     ago: '前',
+    notifications: '',
+    markAllRead: '',
+    noReports: '',
+    viewAll: '',
     status: {
       friendly: '友好的',
       neutral: '中立',
@@ -846,10 +889,17 @@ export default {
       viewPlanets: '惑星を表示'
     },
     lastEvent: '最後のイベント',
+    reportDetails: '',
+    eventDescription: '',
+    reputationChange: '',
+    before: '',
+    after: '',
+    statusChange: '',
+    viewDiplomacy: '',
     events: {
       gift: 'ギフト送信',
       attack: '攻撃',
-    missileAttack: 'ミサイル攻撃',
+      missileAttack: 'ミサイル攻撃',
       allyAttacked: '同盟が攻撃された',
       spy: '諜報活動',
       stealDebris: '残骸を略奪'
@@ -874,12 +924,20 @@ export default {
       receivedGiftFromNpc: '{npcName}からギフトを受け取りました',
       acceptedGiftFromNpc: '{npcName}からのギフトを受け取りました：{metal}M {crystal}C {deuterium}D',
       playerRejectedGift: 'プレイヤーがギフトを拒否しました',
-      rejectedGiftFromNpc: '{npcName}からのギフトを拒否しました。評判{reputation}'
+      rejectedGiftFromNpc: '{npcName}からのギフトを拒否しました。評判{reputation}',
+      destroyedNpcPlanet: '{npcName}の{planetName}を破壊しました',
+      playerDestroyedPlanet: 'プレイヤーが{planetName}を破壊しました',
+      youDestroyedNpcPlanet: 'あなたは{npcName}の{planetName}を破壊しました。評判{reputation}',
+      playerDestroyedAllyPlanet: 'プレイヤーが同盟{allyName}の{planetName}を破壊しました',
+      allyOutraged: '{allyName}はあなたが同盟{targetName}の{planetName}を破壊したことに激怒しています',
+      npcEliminated: 'NPC {npcName}は完全に排除されました',
+      npcEliminatedMessage: 'あなたは{npcName}のすべての惑星を破壊しました！この勢力は完全に壊滅しました。'
     }
   },
   pagination: {
     previous: '前へ',
     next: '次へ',
+    gotIt: '',
     first: '最初',
     last: '最後',
     page: '{page}ページ'
@@ -888,5 +946,39 @@ export default {
     title: 'ページが見つかりません',
     description: '申し訳ございません。お探しのページは存在しません',
     goHome: 'ホームに戻る'
+  },
+  time: {
+    days: '日',
+    hours: '時間',
+    minutes: '分',
+    seconds: '秒'
+  },
+  tutorial: {
+    welcome: {
+      title: 'OGame-Vue-Ts へようこそ',
+      content: 'ようこそ、司令官！基礎から始めて、宇宙帝国を築きましょう。'
+    },
+    buildSolarPlant: {
+      title: '太陽光発電所を建設',
+      content:
+        'まず太陽光発電所を建設しましょう！惑星にエネルギーを供給します。エネルギーがないと、他の資源施設が機能しません。これが最も重要な第一歩です。'
+    },
+    waitBuild: {
+      title: '建設キュー',
+      content:
+        '建物は建設キューに追加されました。右上のキューアイコンをクリックすると、進行中のすべての建設と研究タスクを確認できます。建設には時間がかかりますが、待機中も作業を続けられます。'
+    },
+    mobile: {
+      welcome: {
+        title: 'OGame-Vue-Ts へようこそ（モバイル版）',
+        content:
+          'ようこそ、司令官！これはタッチスクリーン向けに最適化された簡易チュートリアルです。帝国建設を始めるために、コア機能を素早くご紹介します。'
+      },
+      waitBuild: {
+        title: '建設キュー',
+        content:
+          '右上のキューアイコンをクリックして建設進度を確認できます。他のページを閲覧し続けることができます。建設はバックグラウンドで進行します。'
+      }
+    }
   }
 }

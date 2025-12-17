@@ -4,7 +4,7 @@
 
     <!-- 标签切换 -->
     <Tabs v-model="activeTab" class="w-full">
-      <TabsList class="grid w-full grid-cols-2 sm:grid-cols-4" :tab-count="4">
+      <TabsList class="grid w-full grid-cols-2 sm:grid-cols-4">
         <TabsTrigger v-for="tab in tabs" :key="tab.value" :value="tab.value" class="flex items-center justify-center gap-1 px-2">
           <component :is="tab.icon" class="h-3 w-3 sm:h-4 sm:w-4" />
           <span class="text-xs sm:text-sm truncate">{{ tab.label }}</span>
@@ -296,6 +296,249 @@
 
     <!-- 间谍报告对话框 -->
     <SpyReportDialog v-model:open="showSpyDialog" :report="selectedSpyReport" />
+
+    <!-- 被侦查通知详情对话框 -->
+    <Dialog :open="showSpiedDialog" @update:open="showSpiedDialog = $event">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2">
+            <Eye class="h-5 w-5 text-purple-500" />
+            {{ t('messagesView.spiedNotificationDetails') }}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div v-if="selectedSpiedNotification" class="space-y-4">
+          <!-- 侦查者信息 -->
+          <div class="p-4 bg-muted/50 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="font-semibold text-lg">{{ selectedSpiedNotification.npcName }}</h3>
+              <Badge variant="destructive">{{ t('messagesView.spyDetected') }}</Badge>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              {{ formatDate(selectedSpiedNotification.timestamp) }}
+            </p>
+          </div>
+
+          <!-- 被侦查星球 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.targetPlanet') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md flex items-center gap-2">
+              <Globe class="h-4 w-4 text-blue-500" />
+              <span class="font-medium">{{ selectedSpiedNotification.targetPlanetName }}</span>
+            </div>
+          </div>
+
+          <!-- 检测结果 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.detectionResult') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md">
+              <div v-if="selectedSpiedNotification.detectionSuccess" class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+                <AlertTriangle class="h-5 w-5" />
+                <span class="font-medium">{{ t('messagesView.detectionSuccess') }}</span>
+              </div>
+              <p class="text-sm mt-2">
+                {{
+                  t('messagesView.spiedNotificationMessage', {
+                    npc: selectedSpiedNotification.npcName,
+                    planet: selectedSpiedNotification.targetPlanetName
+                  })
+                }}
+              </p>
+            </div>
+          </div>
+
+          <!-- 建议 -->
+          <div class="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-800">
+            <p class="text-sm text-blue-800 dark:text-blue-200">
+              {{ t('messagesView.spiedNotificationTip') }}
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="showSpiedDialog = false">{{ t('common.close') }}</Button>
+          <Button @click="viewNPCInGalaxy(selectedSpiedNotification?.npcId)">{{ t('messagesView.viewInGalaxy') }}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 任务报告详情对话框 -->
+    <Dialog :open="showMissionDialog" @update:open="showMissionDialog = $event">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2">
+            <component :is="getMissionIcon(selectedMissionReport?.missionType)" class="h-5 w-5" />
+            {{ t('messagesView.missionReportDetails') }}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div v-if="selectedMissionReport" class="space-y-4">
+          <!-- 任务状态 -->
+          <div class="p-4 bg-muted/50 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="font-semibold text-lg">{{ getMissionTypeName(selectedMissionReport.missionType) }}</h3>
+              <Badge :variant="selectedMissionReport.success ? 'default' : 'destructive'">
+                {{ selectedMissionReport.success ? t('messagesView.missionSuccess') : t('messagesView.missionFailed') }}
+              </Badge>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              {{ formatDate(selectedMissionReport.timestamp) }}
+            </p>
+          </div>
+
+          <!-- 起点和终点 -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <h4 class="font-semibold text-sm">{{ t('messagesView.origin') }}</h4>
+              <div class="p-3 bg-muted/30 rounded-md">
+                <p class="font-medium">{{ selectedMissionReport.originPlanetName }}</p>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-semibold text-sm">{{ t('messagesView.destination') }}</h4>
+              <div class="p-3 bg-muted/30 rounded-md">
+                <p class="font-medium" v-if="selectedMissionReport.targetPlanetName">{{ selectedMissionReport.targetPlanetName }}</p>
+                <p class="text-sm text-muted-foreground" v-else>
+                  [{{ selectedMissionReport.targetPosition.galaxy }}:{{ selectedMissionReport.targetPosition.system }}:{{
+                    selectedMissionReport.targetPosition.position
+                  }}]
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 任务详情 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.missionDetails') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md">
+              <p class="text-sm mb-2">{{ selectedMissionReport.message }}</p>
+
+              <!-- 运输任务详情 -->
+              <div v-if="selectedMissionReport.details?.transportedResources" class="mt-3 space-y-1">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.transportedResources') }}:</p>
+                <div class="grid grid-cols-3 gap-2 text-sm">
+                  <div>{{ t('resources.metal') }}: {{ selectedMissionReport.details.transportedResources.metal.toLocaleString() }}</div>
+                  <div>{{ t('resources.crystal') }}: {{ selectedMissionReport.details.transportedResources.crystal.toLocaleString() }}</div>
+                  <div>
+                    {{ t('resources.deuterium') }}: {{ selectedMissionReport.details.transportedResources.deuterium.toLocaleString() }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 回收任务详情 -->
+              <div v-if="selectedMissionReport.details?.recycledResources" class="mt-3 space-y-1">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.recycledResources') }}:</p>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <div>{{ t('resources.metal') }}: {{ selectedMissionReport.details.recycledResources.metal.toLocaleString() }}</div>
+                  <div>{{ t('resources.crystal') }}: {{ selectedMissionReport.details.recycledResources.crystal.toLocaleString() }}</div>
+                </div>
+                <div v-if="selectedMissionReport.details.remainingDebris" class="mt-2">
+                  <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.remainingDebris') }}:</p>
+                  <div class="grid grid-cols-2 gap-2 text-sm text-yellow-600 dark:text-yellow-400">
+                    <div>{{ t('resources.metal') }}: {{ selectedMissionReport.details.remainingDebris.metal.toLocaleString() }}</div>
+                    <div>{{ t('resources.crystal') }}: {{ selectedMissionReport.details.remainingDebris.crystal.toLocaleString() }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 殖民任务详情 -->
+              <div v-if="selectedMissionReport.details?.newPlanetName" class="mt-3">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.newPlanet') }}:</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <Globe class="h-4 w-4 text-green-500" />
+                  <span class="font-medium">{{ selectedMissionReport.details.newPlanetName }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="showMissionDialog = false">{{ t('common.close') }}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- NPC活动通知详情对话框 -->
+    <Dialog :open="showNPCActivityDialog" @update:open="showNPCActivityDialog = $event">
+      <DialogContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2">
+            <Recycle class="h-5 w-5 text-yellow-500" />
+            {{ t('messagesView.npcActivityDetails') }}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div v-if="selectedNPCActivityNotification" class="space-y-4">
+          <!-- NPC信息 -->
+          <div class="p-4 bg-muted/50 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="font-semibold text-lg">{{ selectedNPCActivityNotification.npcName }}</h3>
+              <Badge variant="secondary">{{ t('messagesView.activityType.' + selectedNPCActivityNotification.activityType) }}</Badge>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              {{ formatDate(selectedNPCActivityNotification.timestamp) }}
+            </p>
+          </div>
+
+          <!-- 活动位置 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.activityLocation') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md">
+              <div class="flex items-center gap-2 mb-2">
+                <Globe class="h-4 w-4 text-blue-500" />
+                <span class="font-medium">
+                  {{ t('messagesView.position') }}: [{{ selectedNPCActivityNotification.targetPosition.galaxy }}:{{
+                    selectedNPCActivityNotification.targetPosition.system
+                  }}:{{ selectedNPCActivityNotification.targetPosition.position }}]
+                </span>
+              </div>
+              <p v-if="selectedNPCActivityNotification.targetPlanetName" class="text-sm text-muted-foreground">
+                {{ t('messagesView.nearPlanet') }}: {{ selectedNPCActivityNotification.targetPlanetName }}
+              </p>
+            </div>
+          </div>
+
+          <!-- 活动描述 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.activityDescription') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md">
+              <p class="text-sm">
+                {{
+                  t('messagesView.npcActivityMessage', {
+                    npc: selectedNPCActivityNotification.npcName,
+                    activity: t('messagesView.activityType.' + selectedNPCActivityNotification.activityType),
+                    position: `[${selectedNPCActivityNotification.targetPosition.galaxy}:${selectedNPCActivityNotification.targetPosition.system}:${selectedNPCActivityNotification.targetPosition.position}]`
+                  })
+                }}
+              </p>
+            </div>
+          </div>
+
+          <!-- 到达时间 -->
+          <div class="space-y-2">
+            <h4 class="font-semibold text-sm">{{ t('messagesView.arrivalTime') }}</h4>
+            <div class="p-3 bg-muted/30 rounded-md">
+              <p class="font-medium">{{ formatDate(selectedNPCActivityNotification.arrivalTime) }}</p>
+            </div>
+          </div>
+
+          <!-- 提示信息 -->
+          <div class="p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-md border border-yellow-200 dark:border-yellow-800">
+            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+              {{ t('messagesView.npcActivityTip') }}
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="showNPCActivityDialog = false">{{ t('common.close') }}</Button>
+          <Button @click="viewLocationInGalaxy(selectedNPCActivityNotification?.targetPosition)">
+            {{ t('messagesView.viewInGalaxy') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
@@ -303,14 +546,16 @@
   import { useGameStore } from '@/stores/gameStore'
   import { useI18n } from '@/composables/useI18n'
   import { computed, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
   import { Button } from '@/components/ui/button'
   import { Badge } from '@/components/ui/badge'
+  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
   import BattleReportDialog from '@/components/BattleReportDialog.vue'
   import SpyReportDialog from '@/components/SpyReportDialog.vue'
   import { formatDate } from '@/utils/format'
-  import { X, Sword, Eye, AlertTriangle, Package, Recycle, Gift, Ban, Check, Users } from 'lucide-vue-next'
+  import { X, Sword, Eye, AlertTriangle, Package, Recycle, Gift, Ban, Check, Users, Skull, Globe } from 'lucide-vue-next'
   import type {
     BattleResult,
     SpyReport,
@@ -324,6 +569,7 @@
   import { useNPCStore } from '@/stores/npcStore'
   import * as diplomaticLogic from '@/logic/diplomaticLogic'
 
+  const router = useRouter()
   const gameStore = useGameStore()
   const npcStore = useNPCStore()
   const { t } = useI18n()
@@ -332,8 +578,14 @@
   // 对话框状态
   const showBattleDialog = ref(false)
   const showSpyDialog = ref(false)
+  const showSpiedDialog = ref(false)
+  const showMissionDialog = ref(false)
+  const showNPCActivityDialog = ref(false)
   const selectedBattleReport = ref<BattleResult | null>(null)
   const selectedSpyReport = ref<SpyReport | null>(null)
+  const selectedSpiedNotification = ref<SpiedNotification | null>(null)
+  const selectedMissionReport = ref<MissionReport | null>(null)
+  const selectedNPCActivityNotification = ref<NPCActivityNotification | null>(null)
 
   // 排序后的战斗报告（最新的在前）
   const sortedBattleReports = computed(() => {
@@ -525,6 +777,9 @@
     if (!notification.read) {
       notification.read = true
     }
+    // 设置选中的通知并打开详情对话框
+    selectedSpiedNotification.value = notification
+    showSpiedDialog.value = true
   }
 
   // 删除战斗报告
@@ -560,6 +815,9 @@
     if (!notification.read) {
       notification.read = true
     }
+    // 设置选中的通知并打开详情对话框
+    selectedNPCActivityNotification.value = notification
+    showNPCActivityDialog.value = true
   }
 
   // 删除NPC活动通知
@@ -592,6 +850,9 @@
     if (!report.read) {
       report.read = true
     }
+    // 设置选中的报告并打开详情对话框
+    selectedMissionReport.value = report
+    showMissionDialog.value = true
   }
 
   // 删除任务报告
@@ -654,6 +915,58 @@
     const index = gameStore.player.giftRejectedNotifications.findIndex(r => r.id === rejectionId)
     if (index > -1) {
       gameStore.player.giftRejectedNotifications.splice(index, 1)
+    }
+  }
+
+  // 查看NPC在星系中的位置
+  const viewNPCInGalaxy = (npcId?: string) => {
+    if (!npcId) return
+    const npc = npcStore.npcs.find(n => n.id === npcId)
+    if (!npc || npc.planets.length === 0) return
+
+    const targetPlanet = npc.planets[0]
+    if (!targetPlanet) return
+
+    showSpiedDialog.value = false
+    router.push({
+      path: '/galaxy',
+      query: {
+        galaxy: targetPlanet.position.galaxy,
+        system: targetPlanet.position.system,
+        highlightNpc: npcId
+      }
+    })
+  }
+
+  // 查看位置在星系中
+  const viewLocationInGalaxy = (position?: { galaxy: number; system: number; position: number }) => {
+    if (!position) return
+
+    showNPCActivityDialog.value = false
+    router.push({
+      path: '/galaxy',
+      query: {
+        galaxy: position.galaxy,
+        system: position.system
+      }
+    })
+  }
+
+  // 获取任务类型图标
+  const getMissionIcon = (missionType?: MissionType) => {
+    if (!missionType) return Package
+
+    switch (missionType) {
+      case MissionType.Transport:
+        return Package
+      case MissionType.Recycle:
+        return Recycle
+      case MissionType.Colonize:
+        return Globe
+      case MissionType.Destroy:
+        return Skull
+      default:
+        return Package
     }
   }
 </script>

@@ -525,6 +525,43 @@
                   </div>
                 </div>
               </div>
+
+              <!-- 探险任务详情 - 发现资源 -->
+              <div v-if="selectedMissionReport.details?.foundResources" class="mt-3 space-y-1">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.resources') }}:</p>
+                <div class="grid grid-cols-2 gap-2 text-sm p-2 bg-green-50 dark:bg-green-950/30 rounded">
+                  <div v-for="res in allResourceFields" :key="res.key">
+                    <template v-if="(selectedMissionReport.details?.foundResources?.[res.key] ?? 0) > 0">
+                      <span class="text-muted-foreground">{{ t(`resources.${res.key}`) }}:</span>
+                      <span class="ml-1 font-medium text-green-600 dark:text-green-400">
+                        +{{ (selectedMissionReport.details?.foundResources?.[res.key] ?? 0).toLocaleString() }}
+                      </span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 探险任务详情 - 发现舰船 -->
+              <div v-if="selectedMissionReport.details?.foundFleet" class="mt-3 space-y-1">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.fleet') }}:</p>
+                <div class="grid grid-cols-2 gap-2 text-sm p-2 bg-blue-50 dark:bg-blue-950/30 rounded">
+                  <div v-for="(count, shipType) in selectedMissionReport.details.foundFleet" :key="shipType">
+                    <span class="text-muted-foreground">{{ t('ships.' + shipType) }}:</span>
+                    <span class="ml-1 font-medium text-blue-600 dark:text-blue-400">+{{ count }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 探险任务详情 - 损失舰船 -->
+              <div v-if="selectedMissionReport.details?.fleetLost" class="mt-3 space-y-1">
+                <p class="text-xs font-semibold text-muted-foreground">{{ t('messagesView.attackerLosses') }}:</p>
+                <div class="grid grid-cols-2 gap-2 text-sm p-2 bg-red-50 dark:bg-red-950/30 rounded">
+                  <div v-for="(count, shipType) in selectedMissionReport.details.fleetLost" :key="shipType">
+                    <span class="text-muted-foreground">{{ t('ships.' + shipType) }}:</span>
+                    <span class="ml-1 font-medium text-red-600 dark:text-red-400">-{{ count }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -705,6 +742,10 @@
   // 残骸资源字段配置（只有金属和晶体）
   type DebrisResourceKey = 'metal' | 'crystal'
   const debrisResourceFields: { key: DebrisResourceKey }[] = [{ key: 'metal' }, { key: 'crystal' }]
+
+  // 全部资源字段配置（包含暗物质，用于探险任务）
+  type AllResourceKey = 'metal' | 'crystal' | 'deuterium' | 'darkMatter'
+  const allResourceFields: { key: AllResourceKey }[] = [{ key: 'metal' }, { key: 'crystal' }, { key: 'deuterium' }, { key: 'darkMatter' }]
 
   const hasSelectedAny = computed(() => {
     return Object.values(clearOptions.value).some(v => v)

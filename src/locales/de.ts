@@ -68,7 +68,8 @@ export default {
     buildingLevelZero: 'Gebäudelevel ist 0, kann nicht abgerissen werden',
     researchQueueFull: 'Forschungsauftrag voll',
     moonExists: 'Mond existiert bereits',
-    insufficientDebris: 'Unzureichendes Trümmerfeld'
+    insufficientDebris: 'Unzureichendes Trümmerfeld',
+    launchFailed: 'Start fehlgeschlagen'
   },
   nav: {
     overview: 'Übersicht',
@@ -739,7 +740,19 @@ export default {
     recycleSuccess: 'Recyclingmission erfolgreich abgeschlossen',
     recycleFailed: 'Recyclingmission fehlgeschlagen, keine Trümmer am Zielort',
     destroySuccess: 'Planetenzerstörungsmission erfolgreich ausgeführt',
-    destroyFailed: 'Planetenzerstörungsmission fehlgeschlagen'
+    destroyFailed: 'Planetenzerstörungsmission fehlgeschlagen',
+    missileAttackSuccess: 'Raketenangriff erfolgreich',
+    missileAttackFailed: 'Raketenangriff fehlgeschlagen, Zielplanet existiert nicht',
+    missileAttackIntercepted: 'Alle Raketen abgefangen',
+    hits: 'Treffer',
+    expeditionResources: 'Die Expedition hat Ressourcen gefunden!',
+    expeditionDarkMatter: 'Die Expedition hat Dunkle Materie gefunden!',
+    expeditionFleet: 'Die Expedition hat verlassene Schiffe gefunden!',
+    expeditionPiratesAttack: 'Die Expedition wurde von Piraten angegriffen und verlor einige Schiffe',
+    expeditionPiratesEscaped: 'Die Expedition traf auf Piraten, konnte aber entkommen',
+    expeditionAliensAttack: 'Die Expedition wurde von Aliens angegriffen und verlor einige Schiffe',
+    expeditionAliensEscaped: 'Die Expedition traf auf Aliens, konnte aber entkommen',
+    expeditionNothing: 'Die Expedition hat nichts gefunden'
   },
   simulatorView: {
     title: 'Kampfsimulator',

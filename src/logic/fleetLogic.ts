@@ -640,6 +640,162 @@ export const processRecycleArrival = (
 }
 
 /**
+ * 远征事件类型
+ */
+export type ExpeditionEventType = 'resources' | 'darkMatter' | 'fleet' | 'nothing' | 'pirates' | 'aliens'
+
+/**
+ * 远征结果
+ */
+export interface ExpeditionResult {
+  eventType: ExpeditionEventType
+  resources?: Partial<Resources>
+  fleet?: Partial<Fleet>
+  fleetLost?: Partial<Fleet>
+  message: string
+}
+
+/**
+ * 处理远征任务到达
+ * 远征任务会随机触发各种事件
+ */
+export const processExpeditionArrival = (mission: FleetMission): ExpeditionResult => {
+  // 计算舰队总货舱容量
+  let totalCargoCapacity = 0
+  for (const [shipType, count] of Object.entries(mission.fleet)) {
+    if (count > 0) {
+      const shipConfig = getShipCargoCapacity(shipType as ShipType)
+      totalCargoCapacity += shipConfig * count
+    }
+  }
+
+  // 随机事件概率
+  const random = Math.random() * 100
+  let result: ExpeditionResult
+
+  if (random < 30) {
+    // 30% 概率发现资源
+    const resourceMultiplier = 0.1 + Math.random() * 0.3 // 10%-40% 的货舱容量
+    const resourceAmount = Math.floor(totalCargoCapacity * resourceMultiplier)
+    const metalAmount = Math.floor(resourceAmount * 0.5)
+    const crystalAmount = Math.floor(resourceAmount * 0.35)
+    const deuteriumAmount = Math.floor(resourceAmount * 0.15)
+
+    mission.cargo.metal += metalAmount
+    mission.cargo.crystal += crystalAmount
+    mission.cargo.deuterium += deuteriumAmount
+
+    result = {
+      eventType: 'resources',
+      resources: { metal: metalAmount, crystal: crystalAmount, deuterium: deuteriumAmount, darkMatter: 0, energy: 0 },
+      message: 'expedition.foundResources'
+    }
+  } else if (random < 40) {
+    // 10% 概率发现暗物质
+    const darkMatterAmount = Math.floor(50 + Math.random() * 150) // 50-200 暗物质
+    mission.cargo.darkMatter += darkMatterAmount
+
+    result = {
+      eventType: 'darkMatter',
+      resources: { metal: 0, crystal: 0, deuterium: 0, darkMatter: darkMatterAmount, energy: 0 },
+      message: 'expedition.foundDarkMatter'
+    }
+  } else if (random < 55) {
+    // 15% 概率发现废弃舰船
+    const foundFleet: Partial<Fleet> = {}
+    const possibleShips: ShipType[] = [ShipType.LightFighter, ShipType.HeavyFighter, ShipType.SmallCargo, ShipType.LargeCargo]
+    const shipTypeIndex = Math.floor(Math.random() * possibleShips.length)
+    const shipType = possibleShips[shipTypeIndex] ?? ShipType.LightFighter
+    const count = Math.floor(1 + Math.random() * 5) // 1-5 艘
+    foundFleet[shipType] = count
+
+    // 将发现的舰船添加到任务舰队中
+    mission.fleet[shipType] = (mission.fleet[shipType] || 0) + count
+
+    result = {
+      eventType: 'fleet',
+      fleet: foundFleet,
+      message: 'expedition.foundFleet'
+    }
+  } else if (random < 70) {
+    // 15% 概率遭遇海盗（损失部分舰队）
+    const fleetLost: Partial<Fleet> = {}
+    let hasLoss = false
+
+    for (const [shipType, count] of Object.entries(mission.fleet)) {
+      if (count > 0 && Math.random() < 0.3) {
+        // 30% 概率损失该类型舰船
+        const lossCount = Math.max(1, Math.floor(count * 0.1)) // 损失10%，最少1艘
+        const actualLoss = Math.min(lossCount, count)
+        fleetLost[shipType as ShipType] = actualLoss
+        mission.fleet[shipType as ShipType] = count - actualLoss
+        hasLoss = true
+      }
+    }
+
+    result = {
+      eventType: 'pirates',
+      fleetLost: hasLoss ? fleetLost : undefined,
+      message: hasLoss ? 'expedition.piratesAttack' : 'expedition.piratesEscaped'
+    }
+  } else if (random < 80) {
+    // 10% 概率遭遇外星人（损失更多舰队）
+    const fleetLost: Partial<Fleet> = {}
+    let hasLoss = false
+
+    for (const [shipType, count] of Object.entries(mission.fleet)) {
+      if (count > 0 && Math.random() < 0.5) {
+        // 50% 概率损失该类型舰船
+        const lossCount = Math.max(1, Math.floor(count * 0.2)) // 损失20%，最少1艘
+        const actualLoss = Math.min(lossCount, count)
+        fleetLost[shipType as ShipType] = actualLoss
+        mission.fleet[shipType as ShipType] = count - actualLoss
+        hasLoss = true
+      }
+    }
+
+    result = {
+      eventType: 'aliens',
+      fleetLost: hasLoss ? fleetLost : undefined,
+      message: hasLoss ? 'expedition.aliensAttack' : 'expedition.aliensEscaped'
+    }
+  } else {
+    // 20% 概率什么都没发现
+    result = {
+      eventType: 'nothing',
+      message: 'expedition.nothing'
+    }
+  }
+
+  mission.status = 'returning'
+  return result
+}
+
+/**
+ * 获取舰船货舱容量
+ */
+const getShipCargoCapacity = (shipType: ShipType): number => {
+  const cargoCapacities: Record<ShipType, number> = {
+    [ShipType.LightFighter]: 50,
+    [ShipType.HeavyFighter]: 100,
+    [ShipType.Cruiser]: 800,
+    [ShipType.Battleship]: 1500,
+    [ShipType.Battlecruiser]: 750,
+    [ShipType.Bomber]: 500,
+    [ShipType.Destroyer]: 2000,
+    [ShipType.SmallCargo]: 5000,
+    [ShipType.LargeCargo]: 25000,
+    [ShipType.ColonyShip]: 7500,
+    [ShipType.Recycler]: 20000,
+    [ShipType.EspionageProbe]: 5,
+    [ShipType.SolarSatellite]: 0,
+    [ShipType.DarkMatterHarvester]: 1000,
+    [ShipType.Deathstar]: 1000000
+  }
+  return cargoCapacities[shipType] || 0
+}
+
+/**
  * 计算行星毁灭概率
  */
 export const calculateDestructionChance = (deathstarCount: number, planetaryShieldCount: number, planetDefensePower: number): number => {

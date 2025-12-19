@@ -68,7 +68,8 @@ export default {
     buildingLevelZero: '建築等級為0，無法拆除',
     researchQueueFull: '研究隊列已滿',
     moonExists: '已存在月球',
-    insufficientDebris: '殘骸場不足'
+    insufficientDebris: '殘骸場不足',
+    launchFailed: '發射失敗'
   },
   nav: {
     overview: '總覽',
@@ -734,7 +735,19 @@ export default {
     recycleSuccess: '回收任務成功完成',
     recycleFailed: '回收任務失敗，目標位置沒有殘骸',
     destroySuccess: '行星毀滅任務成功執行',
-    destroyFailed: '行星毀滅任務失敗'
+    destroyFailed: '行星毀滅任務失敗',
+    expeditionResources: '探險隊發現了資源！',
+    expeditionDarkMatter: '探險隊發現了暗物質！',
+    expeditionFleet: '探險隊發現了廢棄的艦船！',
+    expeditionPiratesAttack: '探險隊遭遇海盜襲擊，損失了部分艦船',
+    expeditionPiratesEscaped: '探險隊遭遇海盜，但成功逃脫',
+    expeditionAliensAttack: '探險隊遭遇外星人襲擊，損失了部分艦船',
+    expeditionAliensEscaped: '探險隊遭遇外星人，但成功逃脫',
+    expeditionNothing: '探險隊什麼也沒有發現',
+    missileAttackSuccess: '導彈攻擊成功！',
+    missileAttackFailed: '導彈攻擊失敗',
+    missileAttackIntercepted: '導彈被攔截',
+    hits: '命中'
   },
   simulatorView: {
     title: '戰鬥模擬器',

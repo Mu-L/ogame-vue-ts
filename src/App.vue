@@ -1048,6 +1048,60 @@
           delete universeStore.planets[targetKey]
         }
       }
+    } else if (mission.missionType === MissionType.Expedition) {
+      // 处理远征任务
+      const expeditionResult = fleetLogic.processExpeditionArrival(mission)
+
+      // 生成远征任务报告
+      if (!gameStore.player.missionReports) {
+        gameStore.player.missionReports = []
+      }
+
+      // 根据事件类型生成不同的报告消息
+      let reportMessage = ''
+      let reportDetails: Record<string, unknown> = {}
+
+      switch (expeditionResult.eventType) {
+        case 'resources':
+          reportMessage = t('missionReports.expeditionResources')
+          reportDetails = { foundResources: expeditionResult.resources }
+          break
+        case 'darkMatter':
+          reportMessage = t('missionReports.expeditionDarkMatter')
+          reportDetails = { foundResources: expeditionResult.resources }
+          break
+        case 'fleet':
+          reportMessage = t('missionReports.expeditionFleet')
+          reportDetails = { foundFleet: expeditionResult.fleet }
+          break
+        case 'pirates':
+          reportMessage = expeditionResult.fleetLost
+            ? t('missionReports.expeditionPiratesAttack')
+            : t('missionReports.expeditionPiratesEscaped')
+          reportDetails = expeditionResult.fleetLost ? { fleetLost: expeditionResult.fleetLost } : {}
+          break
+        case 'aliens':
+          reportMessage = expeditionResult.fleetLost
+            ? t('missionReports.expeditionAliensAttack')
+            : t('missionReports.expeditionAliensEscaped')
+          reportDetails = expeditionResult.fleetLost ? { fleetLost: expeditionResult.fleetLost } : {}
+          break
+        default:
+          reportMessage = t('missionReports.expeditionNothing')
+      }
+
+      gameStore.player.missionReports.push({
+        id: `mission-report-${mission.id}`,
+        timestamp: Date.now(),
+        missionType: MissionType.Expedition,
+        originPlanetId: mission.originPlanetId,
+        originPlanetName,
+        targetPosition: mission.targetPosition,
+        success: expeditionResult.eventType !== 'nothing',
+        message: reportMessage,
+        details: reportDetails,
+        read: false
+      })
     }
   }
 

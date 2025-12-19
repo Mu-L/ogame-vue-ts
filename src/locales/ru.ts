@@ -68,7 +68,8 @@ export default {
     buildingLevelZero: 'Уровень здания 0, нельзя снести',
     researchQueueFull: 'Очередь исследований заполнена',
     moonExists: 'Луна уже существует',
-    insufficientDebris: 'Недостаточно обломков'
+    insufficientDebris: 'Недостаточно обломков',
+    launchFailed: 'Запуск не удался'
   },
   nav: {
     overview: 'Обзор',
@@ -740,7 +741,19 @@ export default {
     recycleSuccess: 'Миссия переработки успешно завершена',
     recycleFailed: 'Миссия переработки провалена, нет обломков в целевой позиции',
     destroySuccess: 'Миссия уничтожения планеты успешно выполнена',
-    destroyFailed: 'Миссия уничтожения планеты провалена'
+    destroyFailed: 'Миссия уничтожения планеты провалена',
+    expeditionResources: 'Экспедиция обнаружила ресурсы!',
+    expeditionDarkMatter: 'Экспедиция обнаружила тёмную материю!',
+    expeditionFleet: 'Экспедиция обнаружила заброшенные корабли!',
+    expeditionPiratesAttack: 'Экспедиция попала в засаду пиратов, часть кораблей потеряна',
+    expeditionPiratesEscaped: 'Экспедиция столкнулась с пиратами, но успела скрыться',
+    expeditionAliensAttack: 'Экспедиция подверглась атаке инопланетян, часть кораблей потеряна',
+    expeditionAliensEscaped: 'Экспедиция столкнулась с инопланетянами, но успела скрыться',
+    expeditionNothing: 'Экспедиция ничего не обнаружила',
+    missileAttackSuccess: 'Ракетная атака успешна!',
+    missileAttackFailed: 'Ракетная атака провалена',
+    missileAttackIntercepted: 'Ракеты перехвачены',
+    hits: 'попаданий'
   },
   simulatorView: {
     title: 'Симулятор боя',

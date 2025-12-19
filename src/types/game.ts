@@ -430,6 +430,12 @@ export interface MissionReport {
     missileHits?: number
     missileIntercepted?: number
     defenseLosses?: Partial<Record<DefenseType, number>>
+    // 探险任务：发现的资源
+    foundResources?: Partial<Resources>
+    // 探险任务：发现的舰船
+    foundFleet?: Partial<Fleet>
+    // 探险任务：损失的舰船
+    fleetLost?: Partial<Fleet>
   }
   read?: boolean
 }

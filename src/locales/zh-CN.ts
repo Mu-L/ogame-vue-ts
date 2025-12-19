@@ -729,7 +729,15 @@ export default {
     missileAttackSuccess: '导弹攻击成功',
     missileAttackFailed: '导弹攻击失败，目标星球不存在',
     missileAttackIntercepted: '所有导弹被拦截',
-    hits: '枚命中'
+    hits: '枚命中',
+    expeditionResources: '远征队发现了资源！',
+    expeditionDarkMatter: '远征队发现了暗物质！',
+    expeditionFleet: '远征队发现了废弃的舰船！',
+    expeditionPiratesAttack: '远征队遭遇海盗袭击，损失了部分舰船',
+    expeditionPiratesEscaped: '远征队遭遇海盗，但成功逃脱',
+    expeditionAliensAttack: '远征队遭遇外星人袭击，损失了部分舰船',
+    expeditionAliensEscaped: '远征队遭遇外星人，但成功逃脱',
+    expeditionNothing: '远征队什么也没有发现'
   },
   simulatorView: {
     title: '战斗模拟器',

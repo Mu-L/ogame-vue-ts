@@ -68,7 +68,8 @@ export default {
     buildingLevelZero: '建物レベルが0のため、解体できません',
     researchQueueFull: '研究キューが満杯です',
     moonExists: '月は既に存在します',
-    insufficientDebris: '残骸フィールドが不足しています'
+    insufficientDebris: '残骸フィールドが不足しています',
+    launchFailed: '発射に失敗しました'
   },
   nav: {
     overview: '概要',
@@ -732,7 +733,19 @@ export default {
     recycleSuccess: '回収ミッションが正常に完了しました',
     recycleFailed: '回収ミッションが失敗しました。目標位置にデブリがありません',
     destroySuccess: '惑星破壊ミッションが正常に実行されました',
-    destroyFailed: '惑星破壊ミッションが失敗しました'
+    destroyFailed: '惑星破壊ミッションが失敗しました',
+    missileAttackSuccess: 'ミサイル攻撃成功',
+    missileAttackFailed: 'ミサイル攻撃失敗、目標惑星が存在しません',
+    missileAttackIntercepted: '全てのミサイルが迎撃されました',
+    hits: '命中',
+    expeditionResources: '探検隊が資源を発見しました！',
+    expeditionDarkMatter: '探検隊がダークマターを発見しました！',
+    expeditionFleet: '探検隊が廃棄された艦船を発見しました！',
+    expeditionPiratesAttack: '探検隊が海賊に襲撃され、一部の艦船を失いました',
+    expeditionPiratesEscaped: '探検隊が海賊に遭遇しましたが、無事に脱出しました',
+    expeditionAliensAttack: '探検隊がエイリアンに襲撃され、一部の艦船を失いました',
+    expeditionAliensEscaped: '探検隊がエイリアンに遭遇しましたが、無事に脱出しました',
+    expeditionNothing: '探検隊は何も発見できませんでした'
   },
   simulatorView: {
     title: '戦闘シミュレーター',

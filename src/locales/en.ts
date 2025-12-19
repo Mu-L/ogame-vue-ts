@@ -67,7 +67,8 @@ export default {
     buildingLevelZero: 'Building level is 0, cannot demolish',
     researchQueueFull: 'Research queue full',
     moonExists: 'Moon already exists',
-    insufficientDebris: 'Insufficient debris field'
+    insufficientDebris: 'Insufficient debris field',
+    launchFailed: 'Launch failed'
   },
   nav: {
     overview: 'Overview',
@@ -732,7 +733,19 @@ export default {
     recycleSuccess: 'Recycling mission completed successfully',
     recycleFailed: 'Recycling mission failed, no debris at target location',
     destroySuccess: 'Planet destruction mission executed successfully',
-    destroyFailed: 'Planet destruction mission failed'
+    destroyFailed: 'Planet destruction mission failed',
+    missileAttackSuccess: 'Missile attack successful',
+    missileAttackFailed: 'Missile attack failed, target planet does not exist',
+    missileAttackIntercepted: 'All missiles intercepted',
+    hits: 'hits',
+    expeditionResources: 'The expedition found resources!',
+    expeditionDarkMatter: 'The expedition found dark matter!',
+    expeditionFleet: 'The expedition found abandoned ships!',
+    expeditionPiratesAttack: 'The expedition was attacked by pirates and lost some ships',
+    expeditionPiratesEscaped: 'The expedition encountered pirates but escaped successfully',
+    expeditionAliensAttack: 'The expedition was attacked by aliens and lost some ships',
+    expeditionAliensEscaped: 'The expedition encountered aliens but escaped successfully',
+    expeditionNothing: 'The expedition found nothing'
   },
   simulatorView: {
     title: 'Battle Simulator',

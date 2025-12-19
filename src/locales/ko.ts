@@ -68,7 +68,8 @@ export default {
     buildingLevelZero: '건물 레벨이 0이므로 철거할 수 없습니다',
     researchQueueFull: '연구 대기열 가득 참',
     moonExists: '위성이 이미 존재합니다',
-    insufficientDebris: '잔해장 부족'
+    insufficientDebris: '잔해장 부족',
+    launchFailed: '발사 실패'
   },
   nav: {
     overview: '개요',
@@ -734,7 +735,19 @@ export default {
     recycleSuccess: '회수 임무가 성공적으로 완료되었습니다',
     recycleFailed: '회수 임무 실패, 목표 위치에 잔해가 없습니다',
     destroySuccess: '행성 파괴 임무가 성공적으로 실행되었습니다',
-    destroyFailed: '행성 파괴 임무 실패'
+    destroyFailed: '행성 파괴 임무 실패',
+    missileAttackSuccess: '미사일 공격 성공',
+    missileAttackFailed: '미사일 공격 실패, 목표 행성이 존재하지 않습니다',
+    missileAttackIntercepted: '모든 미사일이 요격되었습니다',
+    hits: '명중',
+    expeditionResources: '탐험대가 자원을 발견했습니다!',
+    expeditionDarkMatter: '탐험대가 암흑 물질을 발견했습니다!',
+    expeditionFleet: '탐험대가 버려진 함선을 발견했습니다!',
+    expeditionPiratesAttack: '탐험대가 해적의 공격을 받아 일부 함선을 잃었습니다',
+    expeditionPiratesEscaped: '탐험대가 해적과 조우했지만 무사히 탈출했습니다',
+    expeditionAliensAttack: '탐험대가 외계인의 공격을 받아 일부 함선을 잃었습니다',
+    expeditionAliensEscaped: '탐험대가 외계인과 조우했지만 무사히 탈출했습니다',
+    expeditionNothing: '탐험대가 아무것도 발견하지 못했습니다'
   },
   simulatorView: {
     title: '전투 시뮬레이터',

@@ -34,7 +34,7 @@ jobs:
           cache: 'pnpm'
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.23'
 
       - name: Build Frontend & Server
         run: |
@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
